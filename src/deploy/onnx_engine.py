@@ -31,20 +31,54 @@ from src.decoder.beam_search import GrammarGuidedBeamSearchDecoder
 logger = logging.getLogger("ONNXEngine")
 
 
+def check_tensorrt_available() -> bool:
+    """Kiểm tra xem thư viện động TensorRT (libnvinfer / nvinfer.dll) có thực sự tồn tại trong hệ thống không."""
+    import ctypes
+    lib_names = [
+        "libnvinfer.so.10",
+        "libnvinfer.so.8",
+        "libnvinfer.so",
+        "nvinfer.dll",
+        "nvinfer_10.dll",
+        "nvinfer_8.dll",
+    ]
+    for lib in lib_names:
+        try:
+            ctypes.CDLL(lib)
+            return True
+        except OSError:
+            continue
+    return False
+
+
 def get_optimal_providers() -> List[str]:
     """Tự động lựa chọn ExecutionProvider tối ưu nhất của hệ thống."""
     if not HAS_ORT:
         return []
-    available = ort.get_available_providers()
-    priority = [
-        "TensorrtExecutionProvider",
-        "CUDAExecutionProvider",
-        "DmlExecutionProvider",
-        "OpenVINOExecutionProvider",
-        "CPUExecutionProvider",
-    ]
-    selected = [p for p in priority if p in available]
-    return selected if selected else ["CPUExecutionProvider"]
+    available = set(ort.get_available_providers())
+    providers = []
+
+    # 1. TensorRT (Chỉ kích hoạt nếu thư viện libnvinfer thực sự tồn tại để tránh EP Error làm rớt xuống CPU)
+    if "TensorrtExecutionProvider" in available:
+        if check_tensorrt_available():
+            providers.append("TensorrtExecutionProvider")
+        else:
+            logger.info("Chưa có libnvinfer (TensorRT). Tự động chuyển sang CUDAExecutionProvider.")
+
+    # 2. CUDA Execution Provider (tiêu chuẩn cho GPU NVIDIA với cuDNN)
+    if "CUDAExecutionProvider" in available:
+        providers.append("CUDAExecutionProvider")
+
+    # 3. DirectML (Windows GPU) & OpenVINO (Intel)
+    if "DmlExecutionProvider" in available:
+        providers.append("DmlExecutionProvider")
+    if "OpenVINOExecutionProvider" in available:
+        providers.append("OpenVINOExecutionProvider")
+
+    # 4. CPU Fallback cuối cùng
+    providers.append("CPUExecutionProvider")
+
+    return providers
 
 
 def create_session(model_path: str, num_threads: Optional[int] = None) -> "ort.InferenceSession":
