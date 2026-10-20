@@ -138,18 +138,35 @@ class TransformerEncoderBlock(nn.Module if HAS_TORCH else object):
 
 
 class SequencePooling(nn.Module if HAS_TORCH else object):
-    """Sequence Pooling: Chiếu chuỗi spatial tokens thành số lượng slots tương ứng (10 slots)."""
-    def __init__(self, in_features: int = 128, num_slots: int = 10):
+    """
+    Sequence Pooling: Chiếu chuỗi spatial tokens thành số lượng slots tương ứng (10 slots).
+    Kết hợp cơ chế Attention Pooling học sâu với Spatial Horizontal Projection nhằm đảm bảo
+    định hướng không gian từ trái sang phải khớp với thứ tự ký tự biển số xe.
+    """
+    def __init__(self, in_features: int = 128, num_slots: int = 10, h_prime: int = 16, w_prime: int = 64):
         super().__init__()
+        self.num_slots = num_slots
+        self.h_prime = h_prime
+        self.w_prime = w_prime
         self.attention_pool = nn.Linear(in_features, num_slots)
         self.softmax = nn.Softmax(dim=1)
+        self.alpha = nn.Parameter(torch.tensor(0.5))
 
     def forward(self, x):
         # x: [B, N, D]
-        # weights: [B, N, num_slots]
-        weights = self.softmax(self.attention_pool(x))
-        # slots: [B, num_slots, D]
-        slots = torch.bmm(weights.transpose(1, 2), x)
+        B, N, D = x.shape
+        # 1. Cơ chế Attention Pooling
+        weights = self.softmax(self.attention_pool(x)) # [B, N, num_slots]
+        attn_slots = torch.bmm(weights.transpose(1, 2), x) # [B, num_slots, D]
+
+        # 2. Chiếu không gian ngang (Spatial Horizontal Projection)
+        if N == self.h_prime * self.w_prime:
+            x_grid = x.view(B, self.h_prime, self.w_prime, D).mean(dim=1) # [B, W', D]
+            spatial_slots = F.adaptive_avg_pool1d(x_grid.transpose(1, 2), self.num_slots).transpose(1, 2)
+            slots = spatial_slots + self.alpha * attn_slots
+        else:
+            slots = attn_slots
+
         return slots
 
 

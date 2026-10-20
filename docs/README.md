@@ -139,7 +139,29 @@ ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhậ
 
 ---
 
-## 6. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+## 6. Huấn Luyện Hai Pha (Two-Stage Transfer Learning) - Bước 3.2
+
+- **Mục tiêu:** Giúp mô hình CCT đạt khả năng tổng quát hóa cao và triệt tiêu sai lệch phân phối (domain gap) giữa dữ liệu giả lập và dữ liệu thực tế.
+- **Pha 1 (Pre-training trên Dữ Liệu Giả Lập):**
+  - Khởi tạo và huấn luyện mô hình CCTPlateVietnamModel trên dữ liệu từ SyntheticPlateOCRDataset (Bước 1.2).
+  - Học biểu diễn đặc trưng chữ số, chữ cái, đa dạng hóa font chữ chuẩn, màu sắc nền (trắng, vàng, xanh, đỏ, ngoại giao) và texture vật lý.
+  - Lưu checkpoint: weights/cct_stage1_synthetic.pt (~2.18 MB).
+- **Pha 2 (Fine-tuning trên Dữ Liệu Thực Tế):**
+  - Tinh chỉnh trên tập dữ liệu thực tế Kaggle (RealPlateOCRDataset dựa trên data/kaggle_dataset/train.csv và al.csv).
+  - Áp dụng các kỹ thuật làm giàu ảnh thực địa chuyên sâu (src/ocr/augment.py):
+    - **Simulated Screw / Bolt Cutout Occlusion:** Giả lập các lỗ khoan và đinh ốc bắt biển số che khuất một phần nét ký tự (hiện tượng phổ biến trên biển số xe máy và ô tô tại Việt Nam).
+    - **Directional Motion Blur:** Mô phỏng hiện tượng rung lắc camera hành trình hoặc xe đang di chuyển.
+    - **Photometric Distortions & Sensor Noise:** Biến dạng độ sáng, tương phản và nhiễu hạt cảm biến ban đêm.
+  - Bộ lập lịch học tập Cosine Annealing Learning Rate và hàm mất mát Cross-Entropy kèm Label Smoothing (0.05).
+  - Lưu mô hình tối ưu nhất: weights/fast_plate_ocr_vn.pt (~2.18 MB).
+- **Chỉ Số Đánh Giá Chuẩn Xác (src/ocr/metrics.py):**
+  - **Levenshtein Distance:** Tính khoảng cách chỉnh sửa giữa chuỗi dự đoán và chuỗi thực tế.
+  - **Character Error Rate (CER):** $\\text{CER} = \\frac{\\sum \\text{Levenshtein}(y_{pred}, y_{true})}{\\sum \\text{len}(y_{true})}$.
+  - **Full Match Accuracy (FMA):** Tỷ lệ biển số nhận dạng chính xác tuyệt đối 100% từng ký tự.
+
+---
+
+## 7. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -174,7 +196,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 7. Nguồn Phông Chữ & Typography Chuẩn
+## 8. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -188,7 +210,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 8. Cấu Trúc Dự Án (Repository Structure)
+## 9. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
@@ -198,6 +220,10 @@ fast-plate-ocr-vietnamese/
 ├── src/
 │   ├── ocr/                          # Module nhận dạng ký tự quang học CCT (Giai đoạn 3)
 │   │   ├── cct_adapter.py            # Kiến trúc CCT, Positional Embedding & Multi-Head Decoder
+│   │   ├── augment.py                # Screw Cutout, Motion Blur, Photometric Augmentations
+│   │   ├── dataset.py                # PyTorch Dataset loaders (Synthetic & Real Kaggle)
+│   │   ├── metrics.py                # Levenshtein distance, CER & Exact Match Accuracy
+│   │   ├── train.py                  # Two-Stage Transfer Learning trainer
 │   │   └── __init__.py
 │   ├── rectification/                # Module nắn phối cảnh & định tuyến (Bước 2.2)
 │   │   ├── homography.py             # Sắp xếp 4 góc & nắn phẳng ma trận Homography

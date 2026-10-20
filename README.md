@@ -38,18 +38,26 @@ Nhận dạng ký tự quang học biển số xe Việt Nam (LPR/OCR) tốc đ�
    - 4 tầng Transformer Encoder với Multi-Head Attention (4 heads) trích xuất ngữ cảnh liên ký tự hiệu quả cao.
    - Multi-Head Classifier 10 heads dự đoán song song trên tập từ điển 33 tokens hợp lệ, kèm Greedy Sequence Decoder tích hợp kiểm định ngữ pháp DFA trực tiếp.
 
-6. **Thu thập, Chọn lọc & Gán nhãn Thực địa Đa Điều Kiện (Bước 1.3):**
+6. **Huấn Luyện Hai Pha - Two-Stage Transfer Learning (Bước 3.2):**
+   - **Pha 1 (Pre-training):** Huấn luyện trên tập dữ liệu giả lập (Synthetic Engine) để học đặc trưng ký tự cơ sở, đa dạng hóa font chữ và màu sắc nền.
+   - **Pha 2 (Fine-tuning):** Tinh chỉnh trên tập dữ liệu thực tế (Kaggle Dataset) kết hợp kỹ thuật làm giàu ảnh thực địa:
+     - **Screw / Bolt Cutout Occlusion:** Giả lập lỗ khoan và mũ đinh ốc bắt biển số che khuất một phần nét ký tự.
+     - **Directional Motion Blur:** Mô phỏng rung lắc camera hoặc xe đang chạy.
+     - **Photometric Distortions:** Biến dạng ánh sáng, tương phản và nhiễu hạt cảm biến ISO cao.
+   - Trọng số tối ưu hóa lưu tại weights/fast_plate_ocr_vn.pt (~2.18 MB).
+
+7. **Thu thập, Chọn lọc & Gán nhãn Thực địa Đa Điều Kiện (Bước 1.3):**
    - Bộ trích xuất video thông minh (`VideoFrameSampler`): Lọc frame tĩnh, loại bỏ chuyển động nhòe mờ bằng Laplacian Variance Filter ($\text{Threshold} = 85.0$).
    - Nhận diện 5 kịch bản thực địa: Nắng gắt (`SUNNY_DAYLIGHT`), Ngược sáng ban đêm (`NIGHT_BACKLIGHT`), Mưa ẩm (`RAINY_WET`), Góc xiên $30^\circ - 45^\circ$ (`OBLIQUE_ANGLE_30_45`), Cổng bãi đỗ xe (`PARKING_GATE`).
    - Định dạng nhãn chuẩn 5 trường: Bounding box phương tiện, Bounding box biển số, Tọa độ 4 điểm góc $(x_1, y_1) \dots (x_4, y_4)$, chuỗi ký tự OCR và cờ phân loại (`1_LINE` / `2_LINE`).
    - Hỗ trợ giải thuật nắn phẳng xạ ảnh 4 góc (`rectify_plate_quad`) chuyển đổi biển số góc xiên về kích thước chuẩn trước khi đưa vào OCR.
    - Xuất dữ liệu đa chuẩn: JSON phân cấp đầy đủ, CSV phẳng cho OCR và YOLO-OBB.
 
-7. **Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine):**
+8. **Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine):**
    - Sinh từ 300,000 – 500,000 mẫu ảnh biển số bổ trợ với tốc độ >150 ảnh/giây.
    - Mô phỏng đầy đủ hiệu ứng vật lý thực địa: phay xước nhôm, vết cào rách, đốm bùn đất, xoay xạ ảnh 3D (Homography), chói lóa ánh nắng/đèn pha, bóng đổ, nhòe chuyển động và nhiễu cảm biến camera.
 
-8. **Tài liệu nguồn minh bạch:**
+9. **Tài liệu nguồn minh bạch:**
    - Đầy đủ nguồn gốc tra cứu tại [`docs/README.md`](docs/README.md).
 
 ---
