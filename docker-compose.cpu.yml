@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  alpr_vietnam_eval:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fast-plate-ocr-vietnamese:latest
+    container_name: alpr_vietnam_container_cpu
+    restart: unless-stopped
+    ipc: host
+    stdin_open: true
+    tty: true
+
+    # Ánh xạ thư mục dữ liệu vào / ra giữa máy host và container
+    volumes:
+      - ./samples:/app/samples:ro
+      - ./output:/app/output:rw
+      - ./docs:/app/docs:rw
+
+    # Biến môi trường hoạt động của pipeline (CPU mode)
+    environment:
+      - PYTHONPATH=/app
+      - USE_ONNX=true
+      - DEVICE=cpu
+      - CONF_THRESHOLD=0.25
+
+    command: ["evaluate"]

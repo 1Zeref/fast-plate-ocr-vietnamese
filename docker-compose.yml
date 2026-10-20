@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  alpr_vietnam_eval:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fast-plate-ocr-vietnamese:latest
+    container_name: alpr_vietnam_container
+    restart: unless-stopped
+    ipc: host
+    stdin_open: true
+    tty: true
+
+    # Phân bổ tài nguyên GPU thông qua nvidia-container-toolkit
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    # Ánh xạ thư mục dữ liệu vào / ra giữa máy host và container
+    volumes:
+      - ./samples:/app/samples:ro
+      - ./output:/app/output:rw
+      - ./docs:/app/docs:rw
+
+    # Biến môi trường hoạt động của pipeline
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/app
+      - USE_ONNX=true
+      - DEVICE=cuda
+      - CONF_THRESHOLD=0.25
+
+    # Lệnh thực thi mặc định: Chạy kiểm tra phần cứng & phân tích dữ liệu trong samples/
+    command: ["evaluate"]

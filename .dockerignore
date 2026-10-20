@@ -1,0 +1,21 @@
+# Docker Build Context Ignore List
+.git/
+.gitignore
+__pycache__/
+*/*.pyc
+*/*/*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Large Datasets (mounted externally via volumes)
+data/kaggle_dataset/images/
+data/detection_dataset/
+data/real_traffic_dataset/frames/
+data/real_traffic_dataset/rectified_crops/
+dataset/
+
+# Output folder contents
+output/*
+!output/.gitkeep

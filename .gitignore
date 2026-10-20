@@ -25,3 +25,7 @@ Desktop.ini
 
 # System generated logs
 .system_generated/
+
+# Evaluation output folder
+output/*
+!output/.gitkeep

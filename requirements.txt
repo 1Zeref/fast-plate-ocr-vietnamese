@@ -1,0 +1,22 @@
+# FAST-PLATE-OCR-VIETNAMESE: Production Dependencies
+# Core Deep Learning & Tensor Operations
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.23.0,<2.3.0
+
+# Computer Vision & Image Processing
+opencv-python-headless>=4.8.0
+pillow>=9.5.0
+scipy>=1.10.0
+
+# Data Science & Configuration
+pyyaml>=6.0
+pandas>=2.0.0
+
+# Inference Engines & Accelerators
+onnx>=1.14.0
+onnxruntime>=1.16.0
+onnxscript>=0.1.0
+
+# Quality Assurance & Testing
+pytest>=7.4.0

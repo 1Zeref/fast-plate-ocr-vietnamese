@@ -279,7 +279,22 @@ ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhậ
     - Tại vị trí sê-ri đăng ký (vị trí 2): Toàn bộ chữ số và các ký tự cấm (W, J, I, O) bị loại bỏ, ngăn chặn hoàn toàn lỗi đọc chữ B thành số 8.
   - **Vận hành liên tục không rò rỉ bộ nhớ:** Bộ đệm Best-K Buffer và ByteTrack dọn sạch Tracklet quá hạn (`max_lost_frames=30`), độ dao động độ trễ (Jitter Std) chỉ **1.8 ms**, vận hành ổn định 24/7.
 
-## 12. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+---
+
+## 12. Đóng Gói Môi Trường Thực Nghiệm Docker (Docker & Compose Deployment)
+
+- **Dockerfile chuẩn hóa:** Dockerfile xây dựng trên base image 
+vidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04 (Python 3.10, PyTorch 2.2 CUDA 12.1, ONNX Runtime GPU, OpenCV Headless, ffmpeg).
+- **Điều phối dịch vụ:** docker-compose.yml (NVIDIA GPU với capabilities: [gpu], ipc: host) và docker-compose.cpu.yml (chế độ CPU fallback).
+- **Thư mục Mount Ngoài Host:**
+  - ./samples:/app/samples:ro: Chứa ảnh/video test từ máy host sang container.
+  - ./output:/app/output:rw: Lưu trữ kết quả phân tích (ảnh bounding box, video tracklet, file log JSON) ra ngoài host.
+  - ./docs:/app/docs:rw: Tài liệu kỹ thuật dự án.
+- **Kịch bản Khởi động & Kiểm chuẩn:** scripts/entrypoint.sh tự động kiểm tra 
+vidia-smi, xác thực CUDA của PyTorch, chạy bộ kiểm thử pytest tests/ và công cụ demo demo.py.
+- **Hướng dẫn chi tiết:** Xem tại [docs/DOCKER_GUIDE.md](DOCKER_GUIDE.md).
+
+## 13. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -314,7 +329,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 13. Nguồn Phông Chữ & Typography Chuẩn
+## 14. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -328,7 +343,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 14. Cấu Trúc Dự Án (Repository Structure)
+## 15. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
