@@ -93,7 +93,30 @@ ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhậ
 
 ---
 
-## 4. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+---
+
+## 4. Module Nắn Phối Cảnh & Định Tuyến Hình Học (Bước 2.2)
+
+- **Mục tiêu:** Khử hoàn toàn độ méo góc nghiêng của camera và phân luồng biển số, nối không gian biển 2 dòng thành dải 1 dòng chuẩn tắc.
+- **Thuật toán Sắp xếp 4 Góc & Nắn Phối Cảnh (src/rectification/homography.py):**
+  - Hàm order_quad_corners sắp xếp 4 điểm góc bất kỳ theo thứ tự Top-Left, Top-Right, Bottom-Right, Bottom-Left dựa trên cực trị tổng $ và hiệu $.
+  - Tính ma trận Homography  \in \mathbb{R}^{3 \times 3}$ bằng cv2.getPerspectiveTransform và nắn phẳng bằng phép nội suy song tuyến (cv2.warpPerspective).
+  - Hệ trục chuẩn tắc:  \times 128$ (biển dài) và  \times 240$ (biển vuông).
+- **Bộ Định Tuyến Hình Học (src/rectification/router.py):**
+  - Phân loại hình học: 1-line (biển dài) hoặc 2-line (biển vuông).
+  - Kết hợp Ensemble giữa tỷ lệ cạnh hình học (Aspect Ratio /H$ với ngưỡng .40$) và xác suất từ mạng học sâu PlateCornerDetector (Bước 2.1).
+- **Thuật toán Tách Dòng & Virtual 1-Line Strip (src/rectification/splitter.py):**
+  - **Horizontal Projection Profile (Biểu đồ chiếu ngang):** Tính tổng số pixel ký tự theo từng hàng ngang (y) = \sum_x I_{\text{bin}}(x, y)$, tìm điểm thung lũng (local minimum) giữa hai dòng để xác định đường cắt {\text{split}}$.
+  - **Đồng bộ chiều cao:** Cắt tách dòng 1 và dòng 2, chuẩn hóa về cùng chiều cao \text{ px}$ trong khi giữ nguyên tỷ lệ chiều rộng ký tự.
+  - **Nối không gian (Horizontal Concatenation):** Ghép hai dòng theo chiều ngang kèm khoảng đệm phân cách màu nền (separator padding \text{ px}$):
+    \text{Virtual 1-Line Strip} = [\text{Line 1} \quad | \quad \text{Separator} \quad | \quad \text{Line 2}]
+  - Chuẩn hóa toàn bộ dải ảnh về kích thước  \times 64\text{ px}$ tương thích trực tiếp với kiến trúc nhận dạng OCR của fast-plate-ocr.
+- **Pipeline Hoàn Chỉnh (src/rectification/pipeline.py):**
+  - Tích hợp toàn diện: Tọa độ 4 góc $\to$ Nắn phẳng $\to$ Router $\to$ Virtual Strip $\to$ Tensor OCR.
+
+---
+
+## 5. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -128,7 +151,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 5. Nguồn Phông Chữ & Typography Chuẩn
+## 6. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -142,13 +165,19 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 6. Cấu Trúc Dự Án (Repository Structure)
+## 7. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
 ├── configs/
 │   ├── vocab.yaml                    # Cấu hình từ vựng 33 tokens (0-9, A-Z trừ I,O,J,W và pad '_')
 │   └── grammar_schema.yaml           # Bản đồ ngữ pháp, mã tỉnh, mã quân sự, quy tắc DFA
+├── src/
+│   ├── rectification/                # Module nắn phối cảnh & định tuyến (Bước 2.2)
+│   │   ├── homography.py             # Sắp xếp 4 góc & nắn phẳng ma trận Homography
+│   │   ├── router.py                 # Định tuyến hình học (1-line vs 2-line)
+│   │   ├── splitter.py               # Phân tích chiếu ngang & sinh Virtual 1-Line Strip
+│   │   └── pipeline.py               # Pipeline nắn phối cảnh & nạp tensor OCR
 ├── weights/
 │   └── best_detector.pt              # Trọng số mô hình Detector 4 góc biển số (8.3 MB)
 ├── src/
