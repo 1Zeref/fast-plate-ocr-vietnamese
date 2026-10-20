@@ -23,6 +23,9 @@ from src.detector.infer import PlateDetectorInference
 from src.rectification.pipeline import PlateRectificationPipeline
 from src.ocr.cct_adapter import CCTPlateVietnamModel
 from src.decoder.beam_search import GrammarGuidedBeamSearchDecoder
+from src.tracking.byte_tracker import ByteTracker
+from src.tracking.quality import FrameQualityAssessor
+from src.tracking.buffer import BestKFrameBuffer
 
 
 class VietnamesePlateOCRPipeline:
@@ -65,6 +68,12 @@ class VietnamesePlateOCRPipeline:
 
         # 4. Khởi tạo Bộ giải mã Grammar-Guided Beam Search
         self.decoder = GrammarGuidedBeamSearchDecoder(config_path=config_path)
+
+        # 5. Khởi tạo Bộ bám vết ByteTrack & Lọc chất lượng quang học (Giai đoạn 5 - Bước 5.1)
+        self.tracker = ByteTracker(track_thresh=conf_threshold, low_score_thresh=0.10)
+        self.quality_assessor = FrameQualityAssessor(sharpness_threshold=85.0)
+        self.frame_buffer = BestKFrameBuffer(k=5, min_quality_threshold=0.35)
+        self.frame_count = 0
 
     def _normalize_tensor(self, strip_bgr: np.ndarray) -> torch.Tensor:
         """Chuẩn hóa dải ảnh 64x256 thành Tensor đầu vào cho mạng CCT."""
@@ -207,3 +216,122 @@ class VietnamesePlateOCRPipeline:
             )
 
         return vis_img
+
+    def process_video_frame(
+        self,
+        frame: np.ndarray,
+        frame_idx: Optional[int] = None,
+        conf_threshold: Optional[float] = None,
+        beam_width: int = 5,
+        use_grammar: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        Xử lý 1 frame trong luồng video liên tục theo thời gian thực (Bước 5.1):
+        1. Định vị các biển số trong frame (Detector).
+        2. Bám vết ByteTrack: Gán Tracklet ID bất biến cho từng xe qua thời gian.
+        3. Đánh giá chất lượng quang học của frame (Laplace sharpness, geometric skew).
+        4. Cập nhật vào Hàng đợi Best-K buffer cho từng Tracklet ID.
+        5. Nếu Tracklet đã tích lũy đủ khung hình chất lượng cao, chuyển giao cho CCT OCR.
+        """
+        self.frame_count += 1
+        current_fidx = frame_idx if frame_idx is not None else self.frame_count
+
+        h, w = frame.shape[:2]
+
+        # 1. Phát hiện các biển số trong frame
+        if conf_threshold is not None:
+            self.detector.conf_threshold = conf_threshold
+        raw_detections = self.detector.detect(frame)
+
+        # 2. Cập nhật thuật toán bám vết ByteTrack
+        tracked_objects = self.tracker.update(raw_detections)
+
+        active_track_ids = [t.track_id for t in tracked_objects]
+        self.frame_buffer.cleanup_stale_tracks(active_track_ids, max_idle_frames=45, current_frame=current_fidx)
+
+        frame_results: List[Dict[str, Any]] = []
+
+        # 3. Duyệt qua từng Tracklet đang hoạt động
+        for track in tracked_objects:
+            track_id = track.track_id
+            bbox = [int(v) for v in track.tlbr]
+            corners = track.corners
+
+            # Cắt vùng ảnh biển số để đánh giá chất lượng
+            bx1, by1 = max(0, bbox[0]), max(0, bbox[1])
+            bx2, by2 = min(w - 1, bbox[2]), min(h - 1, bbox[3])
+
+            if bx2 <= bx1 or by2 <= by1:
+                continue
+
+            crop_plate = frame[by1:by2, bx1:bx2]
+
+            # 4. Đánh giá chất lượng quang học của frame (Laplacian + Skew)
+            q_info = self.quality_assessor.evaluate_quality(crop_plate, corners=corners, bbox=bbox)
+            q_score = q_info["overall_quality"]
+
+            # Nắn phối cảnh & tạo dải Virtual 1-Line Strip
+            rect_res = self.rectifier.process(
+                image=frame,
+                corners=corners if corners else [[bx1, by1], [bx2, by1], [bx2, by2], [bx1, by2]],
+                detector_layout_hint=track.layout,
+                detector_confidence=track.score,
+            )
+            virtual_strip = rect_res["ocr_input_strip"]
+
+            # 5. Cập nhật vào hàng đợi Best-K buffer
+            was_accepted = self.frame_buffer.add_frame(
+                track_id=track_id,
+                frame_idx=current_fidx,
+                quality_score=q_score,
+                crop_image=crop_plate,
+                corners=corners,
+                bbox=bbox,
+                virtual_strip=virtual_strip,
+                quality_meta=q_info,
+            )
+
+            is_ready = self.frame_buffer.is_ready_for_recognition(track_id, min_frames=2, min_avg_quality=0.35)
+            best_buffered = self.frame_buffer.get_best_frames(track_id)
+
+            plate_text = ""
+            ocr_conf = 0.0
+            is_valid = False
+            plate_type = "UNKNOWN"
+
+            # 6. Nếu đã sẵn sàng, thực hiện nhận diện trên frame tốt nhất trong buffer
+            if is_ready and len(best_buffered) > 0:
+                best_strip = best_buffered[0]["virtual_strip"]
+                if best_strip is not None:
+                    input_tensor = self._normalize_tensor(best_strip)
+                    with torch.no_grad():
+                        logits = self.ocr_model(input_tensor)
+
+                    decoded = self.decoder.decode_single(
+                        logits[0],
+                        beam_width=beam_width,
+                        apply_grammar=use_grammar,
+                    )
+                    plate_text = decoded["text"]
+                    ocr_conf = decoded["confidence"]
+                    is_valid = decoded["is_valid"]
+                    plate_type = decoded.get("dfa_meta", {}).get("plate_type", "UNKNOWN")
+
+            track_summary = self.frame_buffer.get_track_summary(track_id)
+
+            frame_results.append({
+                "track_id": track_id,
+                "bbox": bbox,
+                "corners": corners,
+                "detection_confidence": round(float(track.score), 4),
+                "frame_quality": q_info,
+                "buffered_k_frames": len(best_buffered),
+                "is_ready_for_ocr": is_ready,
+                "plate_text": plate_text,
+                "ocr_confidence": ocr_conf,
+                "is_valid_grammar": is_valid,
+                "plate_type": plate_type,
+                "track_summary": track_summary,
+            })
+
+        return frame_results

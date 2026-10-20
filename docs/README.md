@@ -193,7 +193,27 @@ ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhậ
 
 ---
 
-## 8. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+## 8. Bám Vết Thời Gian Thực & Bộ Lọc Chất Lượng Khung Hình (Bước 5.1)
+
+- **Mục tiêu:** Theo dõi xe theo thời gian thực (luồng video RTSP 25-30 FPS) và chọn lọc các khung hình rõ nét nhất trước khi đưa vào nhận diện.
+- **Thuật Toán ByteTrack (`src/tracking/byte_tracker.py`):**
+  - Tham khảo nghiên cứu: *ByteTrack: Multi-Object Tracking by Associating Every Detection Box* (Zhang et al., ECCV 2022).
+  - Khác biệt với SORT truyền thống, ByteTrack liên kết cả các phát hiện điểm cao ($D_{high}$) và điểm thấp ($D_{low}$), giúp duy trì Tracklet ID liên tục ngay cả khi phương tiện bị che khuất một phần hoặc nhòe mờ.
+  - Bộ lọc Kalman 8 chiều (`src/tracking/kalman.py`) dự đoán tọa độ $[cx, cy, a, h, v_x, v_y, v_a, v_h]$ mượt mà giữa các frame.
+- **Bộ Đánh Giá Chất Lượng Quang Học (`src/tracking/quality.py`):**
+  - Gán nhãn chất lượng toàn diện $Q \in [0.0, 1.0]$ cho từng frame:
+    - **Độ sắc nét (Sharpness):** Biến thiên toán tử Laplace ($\\sigma^2_{Lap}$), loại bỏ các frame rung nhòe vận tốc cao.
+    - **Góc nghiêng & méo hình học (Geometric Skew):** Đánh giá góc xoay cạnh và tỷ lệ đối xứng, phạt các góc xiên cực đoan.
+    - **Độ phân giải (Resolution):** Đánh giá diện tích vùng crop biển số.
+    - **Phân bổ ánh sáng (Photometric):** Phạt hiện tượng chói lóa ngược sáng ban đêm hoặc quá tối.
+- **Hàng Đợi Top-K Khung Hình Tốt Nhất (`src/tracking/buffer.py`):**
+  - Mỗi Tracklet ID duy trì một hàng đợi ưu tiên $K$ khung hình ($K=3-5$) có điểm $Q$ cao nhất.
+  - Tự động thay thế frame mờ khi xuất hiện frame rõ nét hơn.
+  - Chuyển giao tập frame ưu tú nhất cho module tích lũy đa khung hình và OCR.
+
+---
+
+## 9. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -228,7 +248,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 9. Nguồn Phông Chữ & Typography Chuẩn
+## 10. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -242,7 +262,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 10. Cấu Trúc Dự Án (Repository Structure)
+## 11. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
@@ -251,6 +271,13 @@ fast-plate-ocr-vietnamese/
 │   └── grammar_schema.yaml           # Bản đồ ngữ pháp, mã tỉnh, mã quân sự, quy tắc DFA
 ├── src/
 │   ├── pipeline.py                   # Unified End-to-End LPR Pipeline kết hợp 2 dataset
+│   ├── tracking/                     # Module bám vết thời gian thực & lọc chất lượng (Giai đoạn 5)
+│   │   ├── kalman.py                 # Bộ lọc Kalman 8 chiều
+│   │   ├── basetrack.py              # Trạng thái STrack và vòng đời Tracklet
+│   │   ├── byte_tracker.py           # Thuật toán ByteTrack liên kết 2 pha D_high và D_low
+│   │   ├── quality.py                # Bộ lọc chất lượng quang học Laplacian & góc nghiêng
+│   │   ├── buffer.py                 # Hàng đợi Best-K frames buffer
+│   │   └── __init__.py
 │   ├── decoder/                      # Module giải mã ràng buộc ngữ pháp (Giai đoạn 4)
 │   │   ├── masking.py                # Sinh mặt nạ xác suất DFA & khử xung đột quang học
 │   │   ├── beam_search.py            # Thuật toán Grammar-Guided Beam Search
