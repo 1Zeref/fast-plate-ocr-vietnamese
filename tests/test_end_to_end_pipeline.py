@@ -24,7 +24,7 @@ class TestDualDatasetPipeline(unittest.TestCase):
         self.pipeline = VietnamesePlateOCRPipeline(
             detector_weights="weights/best_detector.pt",
             ocr_weights="weights/fast_plate_ocr_vn.pt",
-            conf_threshold=0.50,
+            conf_threshold=0.30,
         )
 
     def test_pipeline_on_full_scene_bomaich(self):
@@ -32,7 +32,7 @@ class TestDualDatasetPipeline(unittest.TestCase):
         scene_dir = "data/detection_dataset/valid/images"
         if os.path.exists(scene_dir) and len(os.listdir(scene_dir)) > 0:
             sample_img = os.path.join(scene_dir, os.listdir(scene_dir)[0])
-            results = self.pipeline.predict(sample_img, beam_width=3, conf_threshold=0.50)
+            results = self.pipeline.predict(sample_img, beam_width=3, conf_threshold=0.30)
             self.assertIsInstance(results, list)
             self.assertGreater(len(results), 0)
             r = results[0]

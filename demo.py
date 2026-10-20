@@ -37,7 +37,9 @@ def evaluate_directory(
     output_dir: str = "output",
     use_onnx: bool = True,
     device: str = "auto",
-    conf_threshold: float = 0.25,
+    conf_threshold: float = 0.40,
+    min_ocr_conf: float = 0.15,
+    min_overall_conf: float = 0.05,
 ) -> Dict[str, Any]:
     """Chạy toàn bộ pipeline trên tất cả các tệp trong samples_dir và xuất sang output_dir."""
     os.makedirs(output_dir, exist_ok=True)
@@ -47,7 +49,7 @@ def evaluate_directory(
     else:
         dev = device
 
-    logger.info("Khởi tạo Pipeline trên thiết bị: [%s] (ONNX Engine=%s)...", dev, use_onnx)
+    logger.info("Khởi tạo Pipeline trên thiết bị: [%s] (ONNX Engine=%s, Conf Thresh=%.2f)...", dev, use_onnx, conf_threshold)
     pipeline = VietnamesePlateOCRPipeline(
         device=dev,
         conf_threshold=conf_threshold,
@@ -82,7 +84,14 @@ def evaluate_directory(
                 continue
 
             t0 = time.perf_counter()
-            dets = pipeline.predict(img, beam_width=5, use_grammar=True)
+            dets = pipeline.predict(
+                img,
+                beam_width=5,
+                use_grammar=True,
+                conf_threshold=conf_threshold,
+                min_ocr_conf=min_ocr_conf,
+                min_overall_conf=min_overall_conf,
+            )
             t1 = time.perf_counter()
             elapsed_ms = (t1 - t0) * 1000.0
             total_latency_ms += elapsed_ms
@@ -207,7 +216,9 @@ def main():
     parser.add_argument("--use-onnx", action="store_true", default=True, help="Sử dụng ONNX Runtime tăng tốc")
     parser.add_argument("--no-onnx", dest="use_onnx", action="store_false", help="Sử dụng PyTorch thay vì ONNX")
     parser.add_argument("--device", type=str, default="auto", choices=["auto", "cuda", "cpu"], help="Thiết bị thực thi")
-    parser.add_argument("--conf-threshold", type=float, default=0.25, help="Ngưỡng tin cậy phát hiện biển số")
+    parser.add_argument("--conf-threshold", type=float, default=0.40, help="Ngưỡng tin cậy phát hiện biển số")
+    parser.add_argument("--min-ocr-conf", type=float, default=0.15, help="Ngưỡng tin cậy tối thiểu cho chuỗi OCR")
+    parser.add_argument("--min-overall-conf", type=float, default=0.05, help="Ngưỡng tin cậy kết hợp tối thiểu")
 
     args = parser.parse_args()
     evaluate_directory(
@@ -216,6 +227,8 @@ def main():
         use_onnx=args.use_onnx,
         device=args.device,
         conf_threshold=args.conf_threshold,
+        min_ocr_conf=args.min_ocr_conf,
+        min_overall_conf=args.min_overall_conf,
     )
 
 

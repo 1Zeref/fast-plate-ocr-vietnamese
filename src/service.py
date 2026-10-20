@@ -43,7 +43,7 @@ class ALPRService:
         cls,
         device: Optional[str] = None,
         use_onnx: bool = True,
-        conf_threshold: float = 0.25,
+        conf_threshold: float = 0.40,
     ) -> "ALPRService":
         """Lấy singleton instance để tránh nạp lại trọng số nhiều lần."""
         if cls._instance is None:
@@ -54,7 +54,7 @@ class ALPRService:
         self,
         device: Optional[str] = None,
         use_onnx: bool = True,
-        conf_threshold: float = 0.25,
+        conf_threshold: float = 0.40,
     ):
         self.device = device or ("cuda" if (HAS_TORCH and torch.cuda.is_available()) else "cpu")
         self.use_onnx = use_onnx
@@ -73,7 +73,7 @@ class ALPRService:
     def process_image(
         self,
         image_input: Union[str, np.ndarray],
-        conf_threshold: float = 0.25,
+        conf_threshold: float = 0.40,
         beam_width: int = 5,
         use_grammar: bool = True,
     ) -> Dict[str, Any]:
@@ -132,7 +132,7 @@ class ALPRService:
     def inspect_pipeline(
         self,
         image_input: Union[str, np.ndarray],
-        conf_threshold: float = 0.25,
+        conf_threshold: float = 0.40,
         beam_width: int = 5,
         plate_idx: int = 0,
     ) -> Dict[str, Any]:
@@ -250,7 +250,7 @@ class ALPRService:
         video_path: str,
         frame_skip: int = 1,
         consensus_k: int = 5,
-        conf_threshold: float = 0.25,
+        conf_threshold: float = 0.40,
     ) -> Generator[Tuple[np.ndarray, pd.DataFrame, str, float], None, None]:
         """
         Bộ Generator xử lý video thời gian thực cho Gradio:
@@ -342,7 +342,7 @@ class ALPRService:
     def process_live_frame(
         self,
         frame_input: np.ndarray,
-        conf_threshold: float = 0.25,
+        conf_threshold: float = 0.40,
         use_grammar: bool = True,
     ) -> Tuple[np.ndarray, float, str]:
         """

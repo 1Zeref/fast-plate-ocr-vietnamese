@@ -29,8 +29,8 @@ class PlateDetectorInference:
     def __init__(
         self,
         weights_path: Optional[str] = None,
-        conf_threshold: float = 0.50,
-        nms_threshold: float = 0.40,
+        conf_threshold: float = 0.40,
+        nms_threshold: float = 0.35,
         input_size: Tuple[int, int] = (384, 384),
         device: str = "cuda" if HAS_TORCH and torch.cuda.is_available() else "cpu",
     ):
@@ -61,19 +61,87 @@ class PlateDetectorInference:
             return tensor, orig_w, orig_h
         return chw, orig_w, orig_h
 
+    def _is_valid_plate_geometry(
+        self,
+        corners: List[List[int]],
+        bbox: List[int],
+        orig_w: int,
+        orig_h: int,
+        layout: str = "1_LINE",
+    ) -> bool:
+        """
+        Kiểm tra tính hợp lệ hình học của biển số xe Việt Nam:
+        - Tứ giác phải lồi (Convex Quadrilateral), không tự cắt chéo.
+        - Giới hạn diện tích thực tế (0.03% <= Area <= 15% khung hình).
+        - Tỷ lệ khung hình (Aspect Ratio W/H):
+          * Biển dài (1_LINE): chuẩn ~4.7, dải hợp lệ 1.8 <= AR <= 6.5.
+          * Biển vuông (2_LINE): chuẩn ~1.4 - 2.0, dải hợp lệ 0.9 <= AR <= 2.8.
+        """
+        bx_min, by_min, bx_max, by_max = bbox
+        bw = bx_max - bx_min
+        bh = by_max - by_min
+
+        # 1. Kích thước tối thiểu tuyệt đối
+        if bw < 20 or bh < 10:
+            return False
+
+        # 2. Kiểm tra tứ giác lồi
+        pts_np = np.array(corners, dtype=np.int32)
+        if not cv2.isContourConvex(pts_np):
+            return False
+
+        # 3. Diện tích tứ giác so với kích thước khung hình
+        area = float(cv2.contourArea(pts_np.astype(np.float32)))
+        frame_area = float(orig_w * orig_h)
+        min_area = max(100.0, frame_area * 0.0003)
+        max_area = frame_area * 0.15
+        if area < min_area or area > max_area:
+            return False
+
+        # 4. Tỷ lệ cạnh (Aspect Ratio)
+        aspect_ratio = float(bw) / float(max(1, bh))
+        if aspect_ratio < 0.90 or aspect_ratio > 6.5:
+            return False
+
+        if layout == "1_LINE" and aspect_ratio < 1.8:
+            return False
+        if layout == "2_LINE" and aspect_ratio > 2.8:
+            return False
+
+        return True
+
+    def _has_sufficient_texture(
+        self,
+        image: np.ndarray,
+        bbox: List[int],
+        min_laplacian_var: float = 20.0,
+        min_edge_density: float = 0.015,
+    ) -> bool:
+        """
+        Bộ lọc chất lượng quang học (Quality Gatekeeper):
+        Loại bỏ các vùng trơn nhẵn không có cấu trúc ký tự như mặt đường nhựa, kính xe, nắp capo.
+        """
+        bx_min, by_min, bx_max, by_max = bbox
+        crop = image[by_min:by_max, bx_min:bx_max]
+        if crop.size == 0 or crop.shape[0] < 5 or crop.shape[1] < 5:
+            return False
+
+        gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+        lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
+
+        edges = cv2.Canny(gray, 50, 150)
+        edge_density = float(np.count_nonzero(edges)) / float(gray.size)
+
+        # Mặt đường phẳng, kính tòa nhà, màu sơn đồng nhất có cả biến thiên và mật độ cạnh rất thấp
+        if lap_var < min_laplacian_var and edge_density < min_edge_density:
+            return False
+
+        return True
+
     def detect(self, image: np.ndarray) -> List[Dict[str, Any]]:
         """
         Phát hiện toàn bộ biển số trong ảnh (ảnh toàn cảnh hoặc ảnh crop phương tiện ROI).
-        Trả về danh sách các phát hiện:
-        [
-          {
-            'plate_bbox': [x_min, y_min, x_max, y_max],
-            'corners': [[x1,y1], [x2,y2], [x3,y3], [x4,y4]],
-            'confidence': float,
-            'layout': '1_LINE' / '2_LINE',
-            'rectified_plate': np.ndarray (ảnh biển số đã nắn phẳng thẳng thớm)
-          }, ...
-        ]
+        Áp dụng 3 tầng kiểm duyệt: Ngưỡng kích hoạt heatmap -> Hình học biển số -> Chất lượng quang học.
         """
         orig_h, orig_w = image.shape[:2]
 
@@ -129,8 +197,18 @@ class PlateDetectorInference:
             layout_idx = int(np.argmax(layout_map[:, gy, gx]))
             layout_str = "2_LINE" if layout_idx == 1 else "1_LINE"
 
+            bbox = [bx_min, by_min, bx_max, by_max]
+
+            # TẦNG KIỂM DUYỆT 2: Ràng buộc hình học tứ giác biển số Việt Nam
+            if not self._is_valid_plate_geometry(corners, bbox, orig_w, orig_h, layout=layout_str):
+                continue
+
+            # TẦNG KIỂM DUYỆT 3: Kiểm định kết cấu ký tự / Mật độ cạnh & Laplacian
+            if not self._has_sufficient_texture(image, bbox):
+                continue
+
             detections.append({
-                "plate_bbox": [bx_min, by_min, bx_max, by_max],
+                "plate_bbox": bbox,
                 "corners": corners,
                 "confidence": round(conf, 4),
                 "layout": layout_str,
@@ -146,7 +224,7 @@ class PlateDetectorInference:
         return filtered
 
     def _apply_nms(self, detections: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Non-Maximum Suppression lọc các bounding box trùng lặp."""
+        """Non-Maximum Suppression lọc các bounding box trùng lặp với ngưỡng chặt chẽ."""
         if not detections:
             return []
 
@@ -163,10 +241,34 @@ class PlateDetectorInference:
         if len(indices) == 0:
             return []
         
-        filtered = []
-        for i in indices.flatten():
-            filtered.append(detections[i])
-        return filtered
+        candidates = [detections[i] for i in indices.flatten()]
+        # Sắp xếp theo confidence giảm dần
+        candidates.sort(key=lambda x: x["confidence"], reverse=True)
+
+        # Bộ lọc IoU thứ cấp cho các bounding box còn sót lại
+        final_filtered = []
+        for cand in candidates:
+            c_box = cand["plate_bbox"]
+            keep = True
+            for f in final_filtered:
+                f_box = f["plate_bbox"]
+                # Tính IoU giữa c_box và f_box
+                xi1 = max(c_box[0], f_box[0])
+                yi1 = max(c_box[1], f_box[1])
+                xi2 = min(c_box[2], f_box[2])
+                yi2 = min(c_box[3], f_box[3])
+                inter_area = max(0, xi2 - xi1) * max(0, yi2 - yi1)
+                box_c_area = (c_box[2] - c_box[0]) * (c_box[3] - c_box[1])
+                box_f_area = (f_box[2] - f_box[0]) * (f_box[3] - f_box[1])
+                union_area = box_c_area + box_f_area - inter_area
+                iou = inter_area / float(max(1, union_area))
+                if iou > 0.35:
+                    keep = False
+                    break
+            if keep:
+                final_filtered.append(cand)
+
+        return final_filtered
 
     def _fallback_geometry_detection(self, image: np.ndarray) -> List[Dict[str, Any]]:
         """Thuật toán dự phòng dựa trên trích xuất đặc trưng hình học khi chạy test nhanh."""

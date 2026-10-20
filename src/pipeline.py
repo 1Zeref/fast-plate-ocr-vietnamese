@@ -41,7 +41,7 @@ class VietnamesePlateOCRPipeline:
         ocr_weights: str = "weights/fast_plate_ocr_vn.pt",
         config_path: str = "configs/plate_config_vietnam.yaml",
         device: Optional[str] = None,
-        conf_threshold: float = 0.25,
+        conf_threshold: float = 0.40,
         use_onnx: bool = False,
     ):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -104,6 +104,8 @@ class VietnamesePlateOCRPipeline:
         beam_width: int = 5,
         use_grammar: bool = True,
         conf_threshold: Optional[float] = None,
+        min_ocr_conf: float = 0.15,
+        min_overall_conf: float = 0.05,
     ) -> List[Dict[str, Any]]:
         """
         Nhận dạng toàn diện các biển số xe trong ảnh:
@@ -128,16 +130,18 @@ class VietnamesePlateOCRPipeline:
 
         detections = self.detector.detect(image)
 
-        # Cơ chế Fallback thông minh: Nếu ảnh truyền vào là ảnh crop sẵn biển số (như dataset topkek69)
-        # mà detector không phát hiện được hộp bao trong khung lớn, coi toàn bộ ảnh là 1 biển số
+        # Cơ chế Fallback thông minh: Chỉ áp dụng khi ảnh đầu vào là ảnh crop sẵn biển số (như dataset topkek69)
+        # Đối với ảnh toàn cảnh (Full scene), nếu không phát hiện được biển thì trả về danh sách rỗng, tránh bão dương tính giả.
         if len(detections) == 0:
-            detections = [{
-                "plate_bbox": [0, 0, w - 1, h - 1],
-                "corners": [[0, 0], [w - 1, 0], [w - 1, h - 1], [0, h - 1]],
-                "confidence": 1.0,
-                "layout": "2_LINE" if (w / float(max(1, h))) < 2.2 else "1_LINE",
-                "is_fallback": True,
-            }]
+            is_likely_crop = (w * h <= 250_000) or (max(w, h) <= 500)
+            if is_likely_crop:
+                detections = [{
+                    "plate_bbox": [0, 0, w - 1, h - 1],
+                    "corners": [[0, 0], [w - 1, 0], [w - 1, h - 1], [0, h - 1]],
+                    "confidence": 1.0,
+                    "layout": "2_LINE" if (w / float(max(1, h))) < 2.2 else "1_LINE",
+                    "is_fallback": True,
+                }]
 
         results: List[Dict[str, Any]] = []
 
@@ -170,13 +174,26 @@ class VietnamesePlateOCRPipeline:
                 apply_grammar=use_grammar,
             )
 
+            ocr_conf = float(decoded["confidence"])
+            overall_conf = round(float(det_conf * ocr_conf), 4)
+            plate_text = decoded["text"].strip().replace("_", "")
+
+            # BỘ LỌC ẢO TƯỞNG OCR (Hallucination Suppression):
+            # Loại bỏ các kết quả nhiễu có độ tin cậy quá thấp hoặc ký tự thoái hóa
+            if ocr_conf < min_ocr_conf or overall_conf < min_overall_conf:
+                continue
+            if len(plate_text) < 5:
+                continue
+            if len(set(plate_text)) <= 1:
+                continue
+
             dfa_meta = decoded.get("dfa_meta", {})
 
             results.append({
                 "plate_text": decoded["text"],
-                "ocr_confidence": decoded["confidence"],
+                "ocr_confidence": ocr_conf,
                 "detection_confidence": det_conf,
-                "overall_confidence": round(float(det_conf * decoded["confidence"]), 4),
+                "overall_confidence": overall_conf,
                 "is_valid_grammar": decoded["is_valid"],
                 "plate_type": dfa_meta.get("plate_type", "UNKNOWN"),
                 "province_name": dfa_meta.get("province_name", ""),

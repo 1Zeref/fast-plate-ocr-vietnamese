@@ -180,7 +180,7 @@ def build_webui() -> gr.Blocks:
                         img_input = gr.Image(label="Ảnh Đầu Vào", type="numpy")
                         
                         gr.Markdown("#### ⚙️ Tham Số Nhận Diện")
-                        slider_conf = gr.Slider(0.10, 0.95, value=0.25, step=0.05, label="Detection Confidence Threshold")
+                        slider_conf = gr.Slider(0.10, 0.95, value=0.40, step=0.05, label="Detection Confidence Threshold")
                         slider_beam = gr.Slider(1, 10, value=5, step=1, label="Beam Width (Độ rộng Beam Search)")
                         check_grammar = gr.Checkbox(value=True, label="Kích hoạt Ràng buộc Ngữ pháp DFA (Thông tư 24)")
 
@@ -225,7 +225,7 @@ def build_webui() -> gr.Blocks:
                         gr.Markdown("#### ⚙️ Tham Số Video & Tracking")
                         slider_skip = gr.Slider(1, 4, value=1, step=1, label="Frame Skip (Bước nhảy frame để tăng tốc)")
                         slider_consensus = gr.Slider(3, 8, value=5, step=1, label="Cửa sổ Đồng thuận (Consensus K Frames)")
-                        slider_vid_conf = gr.Slider(0.10, 0.90, value=0.25, step=0.05, label="Detection Threshold")
+                        slider_vid_conf = gr.Slider(0.10, 0.90, value=0.40, step=0.05, label="Detection Threshold")
 
                         btn_process_vid = gr.Button("▶ Bắt Đầu Xử Lý Video", variant="primary", size="lg")
 
@@ -256,7 +256,7 @@ def build_webui() -> gr.Blocks:
                     with gr.Row():
                         with gr.Column():
                             webcam_input = gr.Image(sources=["webcam"], streaming=True, label="Webcam Trực Tiếp")
-                            slider_webcam_conf = gr.Slider(0.10, 0.90, value=0.25, step=0.05, label="Detection Threshold")
+                            slider_webcam_conf = gr.Slider(0.10, 0.90, value=0.40, step=0.05, label="Detection Threshold")
                             check_webcam_grammar = gr.Checkbox(value=True, label="DFA Grammar Constraint")
                         with gr.Column():
                             webcam_output = gr.Image(label="Kết Quả Luồng Trực Tiếp", type="numpy")
@@ -277,7 +277,7 @@ def build_webui() -> gr.Blocks:
                                 placeholder="rtsp://admin:password@192.168.1.100:554/stream1",
                                 value="rtsp://localhost:8554/live",
                             )
-                            slider_rtsp_conf = gr.Slider(0.10, 0.90, value=0.25, step=0.05, label="Detection Threshold")
+                            slider_rtsp_conf = gr.Slider(0.10, 0.90, value=0.40, step=0.05, label="Detection Threshold")
                             btn_connect_rtsp = gr.Button("📡 Kết Nối & Kiểm Tra Frame RTSP", variant="primary")
                         with gr.Column():
                             rtsp_preview = gr.Image(label="Ảnh Preview từ Camera RTSP", type="numpy")
@@ -298,7 +298,7 @@ def build_webui() -> gr.Blocks:
                 with gr.Row():
                     with gr.Column(scale=1):
                         insp_img_input = gr.Image(label="Ảnh Cần Chẩn Đoán", type="numpy")
-                        slider_insp_conf = gr.Slider(0.10, 0.90, value=0.25, step=0.05, label="Detection Threshold")
+                        slider_insp_conf = gr.Slider(0.10, 0.90, value=0.40, step=0.05, label="Detection Threshold")
                         slider_insp_beam = gr.Slider(1, 10, value=5, step=1, label="Beam Width")
                         btn_inspect = gr.Button("🔬 Bóc Tách Toàn Bộ Công Đoạn", variant="primary", size="lg")
 
