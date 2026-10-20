@@ -70,8 +70,15 @@ class PlateDetectorMultiTaskLoss(nn.Module if HAS_TORCH else object):
         pred_conf = predictions["confidence"]
         target_conf = targets.get("conf_map", torch.zeros_like(pred_conf))
 
-        # 1. Objectness / Center Loss
-        loss_conf = self.bce_loss(pred_conf, target_conf)
+        # 1. Objectness / Center Loss (CenterNet Modified Focal Loss)
+        # Giúp triệt tiêu mất cân bằng âm bản cực lớn giữa tâm biển số và nền
+        pos_mask = target_conf >= 0.7
+        neg_mask = target_conf < 0.7
+        alpha = 2.0
+        pos_loss = -torch.pow(1.0 - pred_conf[pos_mask].clamp(min=1e-6, max=1.0 - 1e-6), alpha) * torch.log(pred_conf[pos_mask].clamp(min=1e-6))
+        neg_loss = -torch.pow(pred_conf[neg_mask].clamp(min=1e-6, max=1.0 - 1e-6), alpha) * torch.log((1.0 - pred_conf[neg_mask]).clamp(min=1e-6)) * torch.pow(1.0 - target_conf[neg_mask], 4.0)
+        num_pos = max(1.0, float(pos_mask.sum().item()))
+        loss_conf = (pos_loss.sum() + neg_loss.sum()) / num_pos
 
         # 2. Bbox Loss (chỉ tính tại các điểm có biển số)
         pos_mask = target_conf > 0.5

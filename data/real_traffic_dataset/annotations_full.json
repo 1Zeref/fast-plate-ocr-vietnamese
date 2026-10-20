@@ -2502,6 +2502,96 @@
           "province_name": "Quảng Ninh"
         }
       ]
+    },
+    {
+      "frame_id": "frame_traffic_scene_001",
+      "image_path": "frames/traffic_scene_sample.jpg",
+      "width": 1920,
+      "height": 1080,
+      "scenario": "STREET_SUPERCAR_DAYLIGHT",
+      "num_objects": 2,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            550,
+            420,
+            950,
+            650
+          ],
+          "plate_bbox": [
+            700,
+            500,
+            791,
+            529
+          ],
+          "corners": [
+            [
+              700,
+              500
+            ],
+            [
+              791,
+              500
+            ],
+            [
+              791,
+              529
+            ],
+            [
+              700,
+              529
+            ]
+          ],
+          "text": "51F82743",
+          "layout": "1_LINE",
+          "scenario": "STREET_SUPERCAR_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN",
+          "province_name": "TP. Hồ Chí Minh"
+        },
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            1200,
+            420,
+            1650,
+            650
+          ],
+          "plate_bbox": [
+            1375,
+            501,
+            1500,
+            529
+          ],
+          "corners": [
+            [
+              1375,
+              501
+            ],
+            [
+              1500,
+              501
+            ],
+            [
+              1500,
+              529
+            ],
+            [
+              1375,
+              529
+            ]
+          ],
+          "text": "43346CV03",
+          "layout": "1_LINE",
+          "scenario": "STREET_SUPERCAR_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "DIPLOMATIC_OR_OFFICIAL",
+          "province_name": "Đà Nẵng"
+        }
+      ]
     }
   ]
 }

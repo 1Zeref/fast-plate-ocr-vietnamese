@@ -18,6 +18,28 @@ except ImportError:
     Dataset = object
 
 
+def letterbox(
+    image: np.ndarray,
+    target_size: Tuple[int, int] = (384, 384),
+    fill_value: Tuple[int, int, int] = (114, 114, 114),
+) -> Tuple[np.ndarray, float, int, int]:
+    """
+    Biến đổi ảnh theo thuật toán Letterbox cố định tỷ lệ khung hình:
+    Tránh biến dạng hình học của biển số và padding viền xám tiêu chuẩn (114, 114, 114).
+    """
+    ih, iw = image.shape[:2]
+    tw, th = target_size
+    scale = min(tw / max(1, iw), th / max(1, ih))
+    nw = int(round(iw * scale))
+    nh = int(round(ih * scale))
+    resized = cv2.resize(image, (nw, nh), interpolation=cv2.INTER_LINEAR)
+    pad_x = (tw - nw) // 2
+    pad_y = (th - nh) // 2
+    canvas = np.full((th, tw, 3), fill_value, dtype=np.uint8)
+    canvas[pad_y:pad_y + nh, pad_x:pad_x + nw] = resized
+    return canvas, scale, pad_x, pad_y
+
+
 class VehiclePlateCornerDataset(Dataset):
     """
     Dataset phục vụ huấn luyện mô hình Anchor-Free Keypoint Plate Detector.
@@ -79,16 +101,10 @@ class VehiclePlateCornerDataset(Dataset):
 
         orig_h, orig_w = img.shape[:2]
 
-        # Resize ảnh về target_size
-        resized_img = cv2.resize(img, (self.target_w, self.target_h), interpolation=cv2.INTER_LINEAR)
-        # Chuyển đổi BGR -> RGB và chuẩn hóa về [0.0, 1.0]
-        rgb_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
-        # HWC -> CHW
+        # Tiền xử lý theo chuẩn Letterbox cố định tỷ lệ
+        canvas, scale, pad_x, pad_y = letterbox(img, target_size=(self.target_w, self.target_h))
+        rgb_img = cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
         chw_img = np.transpose(rgb_img, (2, 0, 1))
-
-        # Tỷ lệ co giãn tọa độ
-        scale_x = 1.0 / orig_w
-        scale_y = 1.0 / orig_h
 
         plate_boxes = []
         corners_list = []
@@ -98,13 +114,11 @@ class VehiclePlateCornerDataset(Dataset):
         for obj in sample["objects"]:
             # Bounding box biển số (hỗ trợ cả plate_bbox và bbox_xyxy)
             pb = obj.get("plate_bbox") or obj.get("bbox_xyxy") or [0, 0, orig_w, orig_h]
-            p_box_norm = [
-                np.clip(pb[0] * scale_x, 0.0, 1.0),
-                np.clip(pb[1] * scale_y, 0.0, 1.0),
-                np.clip(pb[2] * scale_x, 0.0, 1.0),
-                np.clip(pb[3] * scale_y, 0.0, 1.0),
-            ]
-            plate_boxes.append(p_box_norm)
+            bx1 = np.clip((pb[0] * scale + pad_x) / float(self.target_w), 0.0, 1.0)
+            by1 = np.clip((pb[1] * scale + pad_y) / float(self.target_h), 0.0, 1.0)
+            bx2 = np.clip((pb[2] * scale + pad_x) / float(self.target_w), 0.0, 1.0)
+            by2 = np.clip((pb[3] * scale + pad_y) / float(self.target_h), 0.0, 1.0)
+            plate_boxes.append([bx1, by1, bx2, by2])
 
             # 4 điểm góc (Corners)
             raw_corners = obj.get("corners")
@@ -117,19 +131,18 @@ class VehiclePlateCornerDataset(Dataset):
                 ]
             norm_corners = []
             for pt in raw_corners:
-                norm_corners.append([
-                    np.clip(pt[0] * scale_x, 0.0, 1.0),
-                    np.clip(pt[1] * scale_y, 0.0, 1.0),
-                ])
+                cx = np.clip((pt[0] * scale + pad_x) / float(self.target_w), 0.0, 1.0)
+                cy = np.clip((pt[1] * scale + pad_y) / float(self.target_h), 0.0, 1.0)
+                norm_corners.append([cx, cy])
             corners_list.append(norm_corners)
 
             # Bounding box phương tiện
             vb = obj.get("vehicle_bbox") or pb
             v_box_norm = [
-                np.clip(vb[0] * scale_x, 0.0, 1.0),
-                np.clip(vb[1] * scale_y, 0.0, 1.0),
-                np.clip(vb[2] * scale_x, 0.0, 1.0),
-                np.clip(vb[3] * scale_y, 0.0, 1.0),
+                np.clip((vb[0] * scale + pad_x) / float(self.target_w), 0.0, 1.0),
+                np.clip((vb[1] * scale + pad_y) / float(self.target_h), 0.0, 1.0),
+                np.clip((vb[2] * scale + pad_x) / float(self.target_w), 0.0, 1.0),
+                np.clip((vb[3] * scale + pad_y) / float(self.target_h), 0.0, 1.0),
             ]
             vehicle_boxes.append(v_box_norm)
 

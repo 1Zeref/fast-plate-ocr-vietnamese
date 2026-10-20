@@ -138,6 +138,15 @@ class VietnamPlateDFA:
             metadata["number"] = num_part
             return True, f"Biển ngoại giao/quốc tế hợp lệ: {DIPLOMATIC_SERIES[diplo_code]}", metadata
 
+        # Dạng 2 (Thông tư 24/2023): [Tỉnh] + [3 số nước] + [NG/QT/NN/CV] + [2 số thứ tự] (ví dụ: 43-346-CV-03 -> 43346CV03)
+        if len(rest) == 7 and rest[:3].isdigit() and rest[3:5] in self.diplomatic_codes and rest[5:].isdigit():
+            diplo_code = rest[3:5]
+            metadata["plate_type"] = "DIPLOMATIC"
+            metadata["series"] = diplo_code
+            metadata["diplomatic_org"] = DIPLOMATIC_SERIES[diplo_code]
+            metadata["number"] = f"{rest[:3]}-{rest[5:]}"
+            return True, f"Biển ngoại giao/quốc tế hợp lệ: {DIPLOMATIC_SERIES[diplo_code]}", metadata
+
         # -------------------------------------------------------------
         # NHÁNH 2.2: BIỂN RƠ-MOÓC / SƠ-MI RƠ-MOÓC (R hoặc RM)
         # -------------------------------------------------------------

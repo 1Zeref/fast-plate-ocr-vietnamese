@@ -20,6 +20,28 @@ except ImportError:
     HAS_TORCH = False
 
 
+def letterbox(
+    image: np.ndarray,
+    target_size: Tuple[int, int] = (384, 384),
+    fill_value: Tuple[int, int, int] = (114, 114, 114),
+) -> Tuple[np.ndarray, float, int, int]:
+    """
+    Biến đổi ảnh theo thuật toán Letterbox cố định tỷ lệ khung hình:
+    Tránh biến dạng hình học của biển số và padding viền xám tiêu chuẩn (114, 114, 114).
+    """
+    ih, iw = image.shape[:2]
+    tw, th = target_size
+    scale = min(tw / max(1, iw), th / max(1, ih))
+    nw = int(round(iw * scale))
+    nh = int(round(ih * scale))
+    resized = cv2.resize(image, (nw, nh), interpolation=cv2.INTER_LINEAR)
+    pad_x = (tw - nw) // 2
+    pad_y = (th - nh) // 2
+    canvas = np.full((th, tw, 3), fill_value, dtype=np.uint8)
+    canvas[pad_y:pad_y + nh, pad_x:pad_x + nw] = resized
+    return canvas, scale, pad_x, pad_y
+
+
 class PlateDetectorInference:
     """
     Bộ suy luận định vị biển số và trích xuất 4 điểm góc tứ giác lồi (Inference Engine).
@@ -49,17 +71,17 @@ class PlateDetectorInference:
             self.model.load_state_dict(state_dict)
             self.model.eval()
 
-    def preprocess(self, image: np.ndarray) -> Tuple[Any, float, float]:
-        """Tiền xử lý ảnh: Resize về input_size và chuẩn hóa tỷ lệ."""
+    def preprocess(self, image: np.ndarray) -> Tuple[Any, float, int, int, int, int]:
+        """Tiền xử lý ảnh: Letterbox về input_size và chuẩn hóa dải pixel [0.0, 1.0]."""
         orig_h, orig_w = image.shape[:2]
-        resized = cv2.resize(image, (self.input_w, self.input_h), interpolation=cv2.INTER_LINEAR)
-        rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        canvas, scale, pad_x, pad_y = letterbox(image, target_size=(self.input_w, self.input_h))
+        rgb = cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
         chw = np.transpose(rgb, (2, 0, 1))
 
         if HAS_TORCH:
             tensor = torch.from_numpy(chw).unsqueeze(0).to(self.device)
-            return tensor, orig_w, orig_h
-        return chw, orig_w, orig_h
+            return tensor, scale, pad_x, pad_y, orig_w, orig_h
+        return chw, scale, pad_x, pad_y, orig_w, orig_h
 
     def _is_valid_plate_geometry(
         self,
@@ -149,7 +171,7 @@ class PlateDetectorInference:
         if self.model is None:
             return self._fallback_geometry_detection(image)
 
-        input_tensor, _, _ = self.preprocess(image)
+        input_tensor, scale, pad_x, pad_y, orig_w, orig_h = self.preprocess(image)
 
         with torch.no_grad():
             outputs = self.model(input_tensor)
@@ -160,38 +182,44 @@ class PlateDetectorInference:
 
         # Tìm các điểm cực đại trên bản đồ confidence
         grid_h, grid_w = conf_map.shape
-        stride_x = orig_w / grid_w
-        stride_y = orig_h / grid_h
+        stride_x = self.input_w / grid_w
+        stride_y = self.input_h / grid_h
 
         detections = []
         candidate_indices = np.argwhere(conf_map >= self.conf_threshold)
 
         for gy, gx in candidate_indices:
             conf = float(conf_map[gy, gx])
-            # Tọa độ tâm gốc
-            cx_orig = (gx + 0.5) * stride_x
-            cy_orig = (gy + 0.5) * stride_y
+            # Tọa độ tâm gốc trên canvas
+            cx_canvas = (gx + 0.5) * stride_x
+            cy_canvas = (gy + 0.5) * stride_y
 
-            # Bbox
-            bw = abs(float(bbox_map[2, gy, gx])) * orig_w
-            bh = abs(float(bbox_map[3, gy, gx])) * orig_h
-            bx_min = max(0, int(cx_orig - bw / 2))
-            by_min = max(0, int(cy_orig - bh / 2))
-            bx_max = min(orig_w - 1, int(cx_orig + bw / 2))
-            by_max = min(orig_h - 1, int(cy_orig + bh / 2))
+            # Bbox trên canvas
+            bw_canvas = abs(float(bbox_map[2, gy, gx])) * self.input_w
+            bh_canvas = abs(float(bbox_map[3, gy, gx])) * self.input_h
+
+            # Ánh xạ ngược từ canvas về ảnh gốc (loại trừ padding viền và chia scale)
+            cx_orig = (cx_canvas - pad_x) / scale
+            cy_orig = (cy_canvas - pad_y) / scale
+            bw_orig = bw_canvas / scale
+            bh_orig = bh_canvas / scale
+
+            bx_min = max(0, min(orig_w - 1, int(round(cx_orig - bw_orig / 2.0))))
+            by_min = max(0, min(orig_h - 1, int(round(cy_orig - bh_orig / 2.0))))
+            bx_max = max(0, min(orig_w - 1, int(round(cx_orig + bw_orig / 2.0))))
+            by_max = max(0, min(orig_h - 1, int(round(cy_orig + bh_orig / 2.0))))
 
             if bx_max <= bx_min or by_max <= by_min:
                 continue
 
-            # 4 điểm góc (Corners)
+            # 4 điểm góc (Corners) ánh xạ ngược về ảnh gốc
             corners = []
             for i in range(4):
-                dx = float(corner_map[i * 2, gy, gx]) * orig_w
-                dy = float(corner_map[i * 2 + 1, gy, gx]) * orig_h
-                corners.append([
-                    max(0, min(orig_w - 1, int(cx_orig + dx))),
-                    max(0, min(orig_h - 1, int(cy_orig + dy))),
-                ])
+                dx_canvas = float(corner_map[i * 2, gy, gx]) * self.input_w
+                dy_canvas = float(corner_map[i * 2 + 1, gy, gx]) * self.input_h
+                c_x_orig = max(0, min(orig_w - 1, int(round((cx_canvas + dx_canvas - pad_x) / scale))))
+                c_y_orig = max(0, min(orig_h - 1, int(round((cy_canvas + dy_canvas - pad_y) / scale))))
+                corners.append([c_x_orig, c_y_orig])
 
             # Layout: 0: 1_LINE, 1: 2_LINE
             layout_idx = int(np.argmax(layout_map[:, gy, gx]))

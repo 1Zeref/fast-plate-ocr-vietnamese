@@ -29,6 +29,35 @@ from src.tracking.buffer import BestKFrameBuffer
 from src.tracking.consensus import TemporalConsensusEngine
 
 
+def format_plate_display(plate_text: str) -> str:
+    """
+    Định dạng chuỗi hiển thị chuẩn trực quan của biển số xe Việt Nam:
+    - 51F82743 -> 51F-827.43
+    - 43346CV03 -> 43-346-CV-03 (hoặc 43CV34603 -> 43-346-CV-03)
+    - 30A1234 -> 30A-1234
+    """
+    clean = plate_text.strip().replace("_", "").replace("-", "").replace(".", "").upper()
+    if not clean:
+        return plate_text
+
+    # 1. Biển ngoại giao Form 2 (ví dụ: 43346CV03 -> 43-346-CV-03)
+    if len(clean) == 9 and clean[:2].isdigit() and clean[2:5].isdigit() and clean[5:7].isalpha() and clean[7:].isdigit():
+        return f"{clean[:2]}-{clean[2:5]}-{clean[5:7]}-{clean[7:]}"
+    # Biển ngoại giao Form 1 (ví dụ: 43CV34603 -> 43-346-CV-03)
+    if len(clean) == 9 and clean[:2].isdigit() and clean[2:4].isalpha() and clean[4:7].isdigit() and clean[7:].isdigit():
+        return f"{clean[:2]}-{clean[4:7]}-{clean[2:4]}-{clean[7:]}"
+
+    # 2. Biển ô tô dân sự 5 số (ví dụ: 51F82743 -> 51F-827.43)
+    if len(clean) == 8 and clean[:2].isdigit() and clean[2].isalpha() and clean[3:].isdigit():
+        return f"{clean[:3]}-{clean[3:6]}.{clean[6:]}"
+
+    # 3. Biển ô tô dân sự 4 số (ví dụ: 29A1234 -> 29A-1234)
+    if len(clean) == 7 and clean[:2].isdigit() and clean[2].isalpha() and clean[3:].isdigit():
+        return f"{clean[:3]}-{clean[3:]}"
+
+    return plate_text
+
+
 class VietnamesePlateOCRPipeline:
     """
     Quy trình tích hợp khép kín End-to-End từ ảnh chụp thực tế tới chuỗi ký tự chuẩn:
@@ -190,7 +219,8 @@ class VietnamesePlateOCRPipeline:
             dfa_meta = decoded.get("dfa_meta", {})
 
             results.append({
-                "plate_text": decoded["text"],
+                "plate_text": format_plate_display(decoded["text"]),
+                "raw_plate_text": decoded["text"],
                 "ocr_confidence": ocr_conf,
                 "detection_confidence": det_conf,
                 "overall_confidence": overall_conf,

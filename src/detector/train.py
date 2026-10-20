@@ -6,6 +6,7 @@ Quy trình huấn luyện mạng định vị biển số và trích xuất 4 đ
 import os
 import sys
 import time
+import math
 import argparse
 from typing import Dict, Any, Tuple, Optional, List
 
@@ -59,7 +60,15 @@ def build_training_targets(targets, grid_size: Tuple[int, int], device: str) -> 
             gx = int(torch.clamp(cx * grid_w, 0, grid_w - 1))
             gy = int(torch.clamp(cy * grid_h, 0, grid_h - 1))
 
-            conf_map[b, 0, gy, gx] = 1.0
+            # Tạo Gaussian heatmap bán kính r=1 xung quanh tâm biển số
+            for dy in [-1, 0, 1]:
+                for dx in [-1, 0, 1]:
+                    ny, nx = gy + dy, gx + dx
+                    if 0 <= ny < grid_h and 0 <= nx < grid_w:
+                        dist_sq = float(dx * dx + dy * dy)
+                        weight = float(math.exp(-dist_sq / 1.5))
+                        if weight > conf_map[b, 0, ny, nx].item():
+                            conf_map[b, 0, ny, nx] = weight
             bbox_map[b, 0, gy, gx] = cx - (gx + 0.5) / grid_w
             bbox_map[b, 1, gy, gx] = cy - (gy + 0.5) / grid_h
             bbox_map[b, 2, gy, gx] = bw

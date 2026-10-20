@@ -98,20 +98,21 @@ class DFAPositionMasker:
 
         # NHÁNH DÂN SỰ / NGOẠI GIAO: prefix[:2] là mã tỉnh
         if step == 2:
-            # Vị trí 2 BẮT BUỘC là chữ cái (Sê-ri bắt đầu bằng chữ, KHÔNG THỂ LÀ SỐ)
-            # Khử hoàn toàn lỗi nhầm 8 -> B, 0 -> D tại slot này!
-            return self.all_letters
+            # Vị trí 2: Chữ cái sê-ri dân sự (30A, 51F) HOẶC chữ số đầu mã nước biển ngoại giao (43-346-CV-03)
+            return self.all_letters | self.all_digits
 
         if step == 3:
-            # Vị trí 3: Có thể là chữ cái thứ 2 (30AA, 51NG, 29LD...) HOẶC chữ số (29B1, 30A-1...)
+            # Vị trí 3: Có thể là chữ cái thứ 2 (30AA, 51NG, 29LD...) HOẶC chữ số (29B1, 43-346-CV-03)
             return self.all_letters | self.all_digits
 
         if step == 4:
-            # Vị trí 4: Chắc chắn là chữ số (bắt đầu dãy số hoặc số xe)
+            # Vị trí 4: Chữ số dãy số xe HOẶC chữ số thứ 3 của mã nước ngoại giao
             return self.all_digits
 
         if step in (5, 6):
-            # Các chữ số tiếp theo trong biển số
+            # Các chữ số tiếp theo HOẶC mã chữ cái ngoại giao (CV, NG, QT...) nếu trước đó là 3 chữ số mã nước
+            if len(prefix) >= 5 and prefix[2:5].isdigit():
+                return self.all_letters | self.all_digits
             return self.all_digits
 
         if step in (7, 8):

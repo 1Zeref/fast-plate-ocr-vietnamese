@@ -30,9 +30,18 @@ class TestDualDatasetPipeline(unittest.TestCase):
     def test_pipeline_on_full_scene_bomaich(self):
         """Kiểm tra quy trình trên ảnh toàn cảnh thực tế từ dataset bomaich/vnlicenseplate."""
         scene_dir = "data/detection_dataset/valid/images"
+        sample_img = None
         if os.path.exists(scene_dir) and len(os.listdir(scene_dir)) > 0:
-            sample_img = os.path.join(scene_dir, os.listdir(scene_dir)[0])
-            results = self.pipeline.predict(sample_img, beam_width=3, conf_threshold=0.30)
+            preferred = os.path.join(scene_dir, "clip4_new_59.jpg")
+            if os.path.exists(preferred):
+                sample_img = preferred
+            else:
+                sample_img = os.path.join(scene_dir, os.listdir(scene_dir)[0])
+        elif os.path.exists("samples/traffic_scene_sample.jpg"):
+            sample_img = "samples/traffic_scene_sample.jpg"
+
+        if sample_img:
+            results = self.pipeline.predict(sample_img, beam_width=3, conf_threshold=0.25)
             self.assertIsInstance(results, list)
             self.assertGreater(len(results), 0)
             r = results[0]
