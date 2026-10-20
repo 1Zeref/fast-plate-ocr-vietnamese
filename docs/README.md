@@ -42,6 +42,32 @@ Dự án nghiên cứu, tối ưu hóa và huấn luyện mô hình nhận dạn
 ### 2.2. Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine)
 - Thiết kế tại `src/synthetic/` hỗ trợ sinh tự động từ $300,000 - 500,000$ mẫu ảnh bổ trợ với đầy đủ nhiễu vật lý thực địa (phay kim loại, xước cơ học, đốm bùn, xoay 3D Homography, chói lóa, bóng đổ, nhòe chuyển động).
 
+### 2.3. Dữ Liệu Video Thực Địa, Trích Xuất & Gán Nhãn Đa Điểm (Bước 1.3)
+- **Nguồn & Kịch bản thực tế:**
+  - Hệ thống camera giám sát giao thông đường phố (ngã tư, làn cao tốc) và camera kiểm soát xe thông minh tại các bãi đỗ xe (GreenParking, Smart Parking Gates).
+  - Bao phủ 5 kịch bản môi trường khắc nghiệt:
+    1. `SUNNY_DAYLIGHT`: Nắng gắt chói chang, độ tương phản cực đại, bóng đen đổ xiên.
+    2. `NIGHT_BACKLIGHT`: Ban đêm ngược sáng mạnh do đèn pha xe chiếu trực diện vào ống kính camera.
+    3. `RAINY_WET`: Trời mưa, bề mặt đường ướt phản quang khuếch tán, giảm độ tương phản viền biển.
+    4. `OBLIQUE_ANGLE_30_45`: Góc đặt camera xiên từ $30^\circ - 45^\circ$ (camera gắn trên cột đèn cao vỉa hè hoặc góc tường bãi xe).
+    5. `PARKING_GATE`: Camera barrier bãi đỗ xe góc cao $20^\circ - 30^\circ$, cự ly gần ($1.5 - 3\text{m}$).
+- **Cơ chế Lọc Chọn Khung Hình Thông Minh (`src/data/video_sampler.py`):**
+  - **Lọc khung hình trùng lặp (Frame Differencing):** Tránh lưu các frame dư thừa khi phương tiện dừng đèn đỏ hoặc chờ barrier mở.
+  - **Lọc nhòe mờ chuyển động (Laplacian Blur Filter):** Tự động tính phương sai toán tử vi phân bậc hai Laplacian $\text{Var}(\Delta I)$, loại bỏ toàn bộ khung hình có điểm dưới ngưỡng $\text{Threshold} = 85.0$.
+  - **Phân loại kịch bản tự động:** Phân tích biểu đồ phân bố độ sáng và tỷ lệ bão hòa pixel để tự động gắn thẻ môi trường.
+- **Đặc Tả Nhãn Chuẩn 5 Trường (`src/data/annotator.py`):**
+  - `vehicle_bbox`: Tọa độ hộp bao phương tiện `[vx1, vy1, vx2, vy2]`.
+  - `plate_bbox`: Tọa độ hộp bao biển số `[px1, py1, px2, py2]`.
+  - `corners`: Tọa độ 4 điểm góc $(x_1, y_1), (x_2, y_2), (x_3, y_3), (x_4, y_4)$ theo thứ tự Top-Left, Top-Right, Bottom-Right, Bottom-Left.
+  - `text`: Chuỗi ký tự biển số ground truth (được kiểm định bởi DFA Bước 1.1).
+  - `layout`: Cờ phân loại hình học (`1_LINE` / `2_LINE`).
+- **Thuật toán Nắn Phẳng Xạ Ảnh 4 Điểm (Perspective Rectification):**
+  - Hàm `rectify_plate_quad` sử dụng ma trận biến đổi Homography $3 \times 3$ để chuyển đổi biển số góc xiên $30^\circ - 45^\circ$ về kích thước chuẩn chữ nhật ($520 \times 120$ cho biển dài, $340 \times 200$ cho biển vuông) trước khi đưa vào mô hình OCR.
+- **Định Dạng Xuất Khẩu:**
+  - `annotations_full.json`: Cấu trúc JSON phân cấp đầy đủ thông tin phương tiện, biển số, tọa độ 4 góc và kịch bản.
+  - `ocr_annotations.csv`: Tệp CSV phẳng tương thích trực tiếp pipeline huấn luyện mô hình OCR.
+  - `yolo_obb_labels/`: Thư mục nhãn định dạng YOLO Oriented Bounding Box (`class x1 y1 x2 y2 x3 y3 x4 y4`) cho bài toán phát hiện biển nghiêng.
+
 ---
 
 ## 3. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)

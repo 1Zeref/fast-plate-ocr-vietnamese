@@ -1,0 +1,2507 @@
+{
+  "version": "1.0",
+  "description": "Vietnam Traffic Real-World Plate Dataset (Surveillance & Parking)",
+  "total_frames": 50,
+  "frames": [
+    {
+      "frame_id": "frame_000000",
+      "image_path": "frames\\frame_000000_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            441,
+            403,
+            746,
+            666
+          ],
+          "plate_bbox": [
+            556,
+            577,
+            642,
+            639
+          ],
+          "corners": [
+            [
+              556,
+              577
+            ],
+            [
+              642,
+              577
+            ],
+            [
+              642,
+              639
+            ],
+            [
+              556,
+              639
+            ]
+          ],
+          "text": "67F917503",
+          "layout": "2_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "An Giang"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000001",
+      "image_path": "frames\\frame_000001_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            376,
+            302,
+            932,
+            594
+          ],
+          "plate_bbox": [
+            586,
+            507,
+            748,
+            551
+          ],
+          "corners": [
+            [
+              586,
+              507
+            ],
+            [
+              748,
+              507
+            ],
+            [
+              748,
+              551
+            ],
+            [
+              586,
+              551
+            ]
+          ],
+          "text": "39FT25949",
+          "layout": "1_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Đồng Nai"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000002",
+      "image_path": "frames\\frame_000002_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            612,
+            228,
+            952,
+            497
+          ],
+          "plate_bbox": [
+            706,
+            404,
+            840,
+            470
+          ],
+          "corners": [
+            [
+              706,
+              404
+            ],
+            [
+              840,
+              404
+            ],
+            [
+              840,
+              470
+            ],
+            [
+              706,
+              470
+            ]
+          ],
+          "text": "54MD552614",
+          "layout": "2_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "ELECTRIC_MOTORCYCLE",
+          "province_name": "TP. Hồ Chí Minh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000003",
+      "image_path": "frames\\frame_000003_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            673,
+            259,
+            1076,
+            577
+          ],
+          "plate_bbox": [
+            800,
+            467,
+            936,
+            547
+          ],
+          "corners": [
+            [
+              800,
+              467
+            ],
+            [
+              936,
+              467
+            ],
+            [
+              936,
+              547
+            ],
+            [
+              800,
+              547
+            ]
+          ],
+          "text": "31L273175",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Hà Nội"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000004",
+      "image_path": "frames\\frame_000004_OBLIQUE_ANGLE_30_45.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "OBLIQUE_ANGLE_30_45",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            794,
+            153,
+            1129,
+            430
+          ],
+          "plate_bbox": [
+            899,
+            305,
+            984,
+            415
+          ],
+          "corners": [
+            [
+              899,
+              305
+            ],
+            [
+              984,
+              335
+            ],
+            [
+              984,
+              403
+            ],
+            [
+              899,
+              415
+            ]
+          ],
+          "text": "92G80357",
+          "layout": "2_LINE",
+          "scenario": "OBLIQUE_ANGLE_30_45",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Quảng Nam"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000005",
+      "image_path": "frames\\frame_000005_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            403,
+            325,
+            1022,
+            674
+          ],
+          "plate_bbox": [
+            621,
+            573,
+            795,
+            621
+          ],
+          "corners": [
+            [
+              621,
+              573
+            ],
+            [
+              795,
+              573
+            ],
+            [
+              795,
+              621
+            ],
+            [
+              621,
+              621
+            ]
+          ],
+          "text": "38ZY27426",
+          "layout": "1_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Hà Tĩnh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000006",
+      "image_path": "frames\\frame_000006_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            418,
+            158,
+            1101,
+            513
+          ],
+          "plate_bbox": [
+            641,
+            410,
+            879,
+            458
+          ],
+          "corners": [
+            [
+              641,
+              410
+            ],
+            [
+              879,
+              410
+            ],
+            [
+              879,
+              458
+            ],
+            [
+              641,
+              458
+            ]
+          ],
+          "text": "80M40532",
+          "layout": "1_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Cục Cảnh sát giao thông (Cấp Trung ương)"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000007",
+      "image_path": "frames\\frame_000007_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            476,
+            237,
+            1083,
+            637
+          ],
+          "plate_bbox": [
+            695,
+            521,
+            885,
+            577
+          ],
+          "corners": [
+            [
+              695,
+              521
+            ],
+            [
+              885,
+              521
+            ],
+            [
+              885,
+              577
+            ],
+            [
+              695,
+              577
+            ]
+          ],
+          "text": "93U01770",
+          "layout": "1_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Bình Phước"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000008",
+      "image_path": "frames\\frame_000008_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            557,
+            238,
+            910,
+            591
+          ],
+          "plate_bbox": [
+            675,
+            482,
+            819,
+            544
+          ],
+          "corners": [
+            [
+              675,
+              482
+            ],
+            [
+              819,
+              482
+            ],
+            [
+              819,
+              544
+            ],
+            [
+              675,
+              544
+            ]
+          ],
+          "text": "37TL35091",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Nghệ An"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000009",
+      "image_path": "frames\\frame_000009_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            330,
+            252,
+            861,
+            642
+          ],
+          "plate_bbox": [
+            503,
+            533,
+            707,
+            579
+          ],
+          "corners": [
+            [
+              503,
+              533
+            ],
+            [
+              707,
+              533
+            ],
+            [
+              707,
+              579
+            ],
+            [
+              503,
+              579
+            ]
+          ],
+          "text": "90CV94064",
+          "layout": "1_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "DIPLOMATIC",
+          "province_name": "Hà Nam"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000010",
+      "image_path": "frames\\frame_000010_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            618,
+            185,
+            1133,
+            511
+          ],
+          "plate_bbox": [
+            787,
+            421,
+            945,
+            457
+          ],
+          "corners": [
+            [
+              787,
+              421
+            ],
+            [
+              945,
+              421
+            ],
+            [
+              945,
+              457
+            ],
+            [
+              787,
+              457
+            ]
+          ],
+          "text": "16V58700",
+          "layout": "1_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Hải Phòng"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000011",
+      "image_path": "frames\\frame_000011_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            460,
+            211,
+            1111,
+            618
+          ],
+          "plate_bbox": [
+            669,
+            505,
+            901,
+            551
+          ],
+          "corners": [
+            [
+              669,
+              505
+            ],
+            [
+              901,
+              505
+            ],
+            [
+              901,
+              551
+            ],
+            [
+              669,
+              551
+            ]
+          ],
+          "text": "57Y29209",
+          "layout": "1_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "TP. Hồ Chí Minh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000012",
+      "image_path": "frames\\frame_000012_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            386,
+            297,
+            956,
+            568
+          ],
+          "plate_bbox": [
+            563,
+            489,
+            783,
+            527
+          ],
+          "corners": [
+            [
+              563,
+              489
+            ],
+            [
+              783,
+              489
+            ],
+            [
+              783,
+              527
+            ],
+            [
+              563,
+              527
+            ]
+          ],
+          "text": "31UV27307",
+          "layout": "1_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Hà Nội"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000013",
+      "image_path": "frames\\frame_000013_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            345,
+            256,
+            659,
+            536
+          ],
+          "plate_bbox": [
+            462,
+            446,
+            554,
+            502
+          ],
+          "corners": [
+            [
+              462,
+              446
+            ],
+            [
+              554,
+              446
+            ],
+            [
+              554,
+              502
+            ],
+            [
+              462,
+              502
+            ]
+          ],
+          "text": "25C05956",
+          "layout": "2_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Lai Châu"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000014",
+      "image_path": "frames\\frame_000014_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            529,
+            274,
+            1140,
+            556
+          ],
+          "plate_bbox": [
+            732,
+            465,
+            936,
+            521
+          ],
+          "corners": [
+            [
+              732,
+              465
+            ],
+            [
+              936,
+              465
+            ],
+            [
+              936,
+              521
+            ],
+            [
+              732,
+              521
+            ]
+          ],
+          "text": "36TB32672",
+          "layout": "1_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Thanh Hóa"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000015",
+      "image_path": "frames\\frame_000015_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            607,
+            188,
+            925,
+            531
+          ],
+          "plate_bbox": [
+            705,
+            425,
+            815,
+            485
+          ],
+          "corners": [
+            [
+              705,
+              425
+            ],
+            [
+              815,
+              425
+            ],
+            [
+              815,
+              485
+            ],
+            [
+              705,
+              485
+            ]
+          ],
+          "text": "65H370757",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Cần Thơ"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000016",
+      "image_path": "frames\\frame_000016_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            588,
+            226,
+            865,
+            511
+          ],
+          "plate_bbox": [
+            673,
+            422,
+            755,
+            474
+          ],
+          "corners": [
+            [
+              673,
+              422
+            ],
+            [
+              755,
+              422
+            ],
+            [
+              755,
+              474
+            ],
+            [
+              673,
+              474
+            ]
+          ],
+          "text": "75P7605",
+          "layout": "2_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_CAR",
+          "province_name": "Thừa Thiên Huế"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000017",
+      "image_path": "frames\\frame_000017_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            631,
+            333,
+            1019,
+            674
+          ],
+          "plate_bbox": [
+            751,
+            552,
+            885,
+            644
+          ],
+          "corners": [
+            [
+              751,
+              552
+            ],
+            [
+              885,
+              552
+            ],
+            [
+              885,
+              644
+            ],
+            [
+              751,
+              644
+            ]
+          ],
+          "text": "75H990349",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Thừa Thiên Huế"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000018",
+      "image_path": "frames\\frame_000018_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            379,
+            344,
+            834,
+            679
+          ],
+          "plate_bbox": [
+            528,
+            588,
+            714,
+            622
+          ],
+          "corners": [
+            [
+              528,
+              588
+            ],
+            [
+              714,
+              588
+            ],
+            [
+              714,
+              622
+            ],
+            [
+              528,
+              622
+            ]
+          ],
+          "text": "86H19540",
+          "layout": "1_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Bình Thuận"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000019",
+      "image_path": "frames\\frame_000019_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            424,
+            161,
+            1046,
+            506
+          ],
+          "plate_bbox": [
+            601,
+            405,
+            855,
+            455
+          ],
+          "corners": [
+            [
+              601,
+              405
+            ],
+            [
+              855,
+              405
+            ],
+            [
+              855,
+              455
+            ],
+            [
+              601,
+              455
+            ]
+          ],
+          "text": "23C16881",
+          "layout": "1_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Hà Giang"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000020",
+      "image_path": "frames\\frame_000020_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            260,
+            304,
+            753,
+            653
+          ],
+          "plate_bbox": [
+            399,
+            526,
+            595,
+            626
+          ],
+          "corners": [
+            [
+              399,
+              526
+            ],
+            [
+              595,
+              526
+            ],
+            [
+              595,
+              626
+            ],
+            [
+              399,
+              626
+            ]
+          ],
+          "text": "74C881393",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Quảng Trị"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000021",
+      "image_path": "frames\\frame_000021_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            810,
+            240,
+            1132,
+            536
+          ],
+          "plate_bbox": [
+            919,
+            439,
+            1037,
+            501
+          ],
+          "corners": [
+            [
+              919,
+              439
+            ],
+            [
+              1037,
+              439
+            ],
+            [
+              1037,
+              501
+            ],
+            [
+              919,
+              501
+            ]
+          ],
+          "text": "25PF86714",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Lai Châu"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000022",
+      "image_path": "frames\\frame_000022_OBLIQUE_ANGLE_30_45.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "OBLIQUE_ANGLE_30_45",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            277,
+            292,
+            877,
+            559
+          ],
+          "plate_bbox": [
+            482,
+            456,
+            637,
+            532
+          ],
+          "corners": [
+            [
+              482,
+              456
+            ],
+            [
+              637,
+              476
+            ],
+            [
+              637,
+              524
+            ],
+            [
+              482,
+              532
+            ]
+          ],
+          "text": "39B51936",
+          "layout": "1_LINE",
+          "scenario": "OBLIQUE_ANGLE_30_45",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Đồng Nai"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000023",
+      "image_path": "frames\\frame_000023_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            477,
+            305,
+            1056,
+            615
+          ],
+          "plate_bbox": [
+            677,
+            521,
+            853,
+            571
+          ],
+          "corners": [
+            [
+              677,
+              521
+            ],
+            [
+              853,
+              521
+            ],
+            [
+              853,
+              571
+            ],
+            [
+              677,
+              571
+            ]
+          ],
+          "text": "77BP23346",
+          "layout": "1_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Bình Định"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000024",
+      "image_path": "frames\\frame_000024_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            546,
+            191,
+            876,
+            558
+          ],
+          "plate_bbox": [
+            659,
+            443,
+            759,
+            511
+          ],
+          "corners": [
+            [
+              659,
+              443
+            ],
+            [
+              759,
+              443
+            ],
+            [
+              759,
+              511
+            ],
+            [
+              659,
+              511
+            ]
+          ],
+          "text": "50H126880",
+          "layout": "2_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "TP. Hồ Chí Minh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000025",
+      "image_path": "frames\\frame_000025_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            324,
+            257,
+            888,
+            601
+          ],
+          "plate_bbox": [
+            492,
+            503,
+            718,
+            547
+          ],
+          "corners": [
+            [
+              492,
+              503
+            ],
+            [
+              718,
+              503
+            ],
+            [
+              718,
+              547
+            ],
+            [
+              492,
+              547
+            ]
+          ],
+          "text": "26Z10288",
+          "layout": "1_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Sơn La"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000026",
+      "image_path": "frames\\frame_000026_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            647,
+            262,
+            920,
+            632
+          ],
+          "plate_bbox": [
+            732,
+            521,
+            842,
+            579
+          ],
+          "corners": [
+            [
+              732,
+              521
+            ],
+            [
+              842,
+              521
+            ],
+            [
+              842,
+              579
+            ],
+            [
+              732,
+              579
+            ]
+          ],
+          "text": "48T687235",
+          "layout": "2_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Đắk Nông"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000027",
+      "image_path": "frames\\frame_000027_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            619,
+            331,
+            1119,
+            654
+          ],
+          "plate_bbox": [
+            771,
+            565,
+            939,
+            599
+          ],
+          "corners": [
+            [
+              771,
+              565
+            ],
+            [
+              939,
+              565
+            ],
+            [
+              939,
+              599
+            ],
+            [
+              771,
+              599
+            ]
+          ],
+          "text": "64U46351",
+          "layout": "1_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Vĩnh Long"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000028",
+      "image_path": "frames\\frame_000028_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            295,
+            237,
+            927,
+            603
+          ],
+          "plate_bbox": [
+            479,
+            497,
+            731,
+            547
+          ],
+          "corners": [
+            [
+              479,
+              497
+            ],
+            [
+              731,
+              497
+            ],
+            [
+              731,
+              547
+            ],
+            [
+              479,
+              547
+            ]
+          ],
+          "text": "50HU91016",
+          "layout": "1_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "TP. Hồ Chí Minh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000029",
+      "image_path": "frames\\frame_000029_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            632,
+            187,
+            965,
+            512
+          ],
+          "plate_bbox": [
+            750,
+            401,
+            858,
+            479
+          ],
+          "corners": [
+            [
+              750,
+              401
+            ],
+            [
+              858,
+              401
+            ],
+            [
+              858,
+              479
+            ],
+            [
+              750,
+              479
+            ]
+          ],
+          "text": "72U99808",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Bà Rịa - Vũng Tàu"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000030",
+      "image_path": "frames\\frame_000030_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            673,
+            247,
+            936,
+            589
+          ],
+          "plate_bbox": [
+            746,
+            489,
+            842,
+            537
+          ],
+          "corners": [
+            [
+              746,
+              489
+            ],
+            [
+              842,
+              489
+            ],
+            [
+              842,
+              537
+            ],
+            [
+              746,
+              537
+            ]
+          ],
+          "text": "54C968974",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "TP. Hồ Chí Minh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000031",
+      "image_path": "frames\\frame_000031_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            438,
+            255,
+            1084,
+            584
+          ],
+          "plate_bbox": [
+            622,
+            486,
+            870,
+            536
+          ],
+          "corners": [
+            [
+              622,
+              486
+            ],
+            [
+              870,
+              486
+            ],
+            [
+              870,
+              536
+            ],
+            [
+              622,
+              536
+            ]
+          ],
+          "text": "58VP40657",
+          "layout": "1_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "TP. Hồ Chí Minh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000032",
+      "image_path": "frames\\frame_000032_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            501,
+            301,
+            901,
+            652
+          ],
+          "plate_bbox": [
+            622,
+            538,
+            784,
+            610
+          ],
+          "corners": [
+            [
+              622,
+              538
+            ],
+            [
+              784,
+              538
+            ],
+            [
+              784,
+              610
+            ],
+            [
+              622,
+              610
+            ]
+          ],
+          "text": "17RM64504",
+          "layout": "2_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "TRAILER",
+          "province_name": "Thái Bình"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000033",
+      "image_path": "frames\\frame_000033_OBLIQUE_ANGLE_30_45.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "OBLIQUE_ANGLE_30_45",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            528,
+            317,
+            1013,
+            682
+          ],
+          "plate_bbox": [
+            689,
+            568,
+            821,
+            625
+          ],
+          "corners": [
+            [
+              689,
+              568
+            ],
+            [
+              821,
+              582
+            ],
+            [
+              821,
+              620
+            ],
+            [
+              689,
+              625
+            ]
+          ],
+          "text": "33LK30465",
+          "layout": "1_LINE",
+          "scenario": "OBLIQUE_ANGLE_30_45",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Hà Nội"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000034",
+      "image_path": "frames\\frame_000034_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            553,
+            246,
+            937,
+            580
+          ],
+          "plate_bbox": [
+            685,
+            465,
+            817,
+            547
+          ],
+          "corners": [
+            [
+              685,
+              465
+            ],
+            [
+              817,
+              465
+            ],
+            [
+              817,
+              547
+            ],
+            [
+              685,
+              547
+            ]
+          ],
+          "text": "29XM52015",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "CIVILIAN_2_LETTERS",
+          "province_name": "Hà Nội"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000035",
+      "image_path": "frames\\frame_000035_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            362,
+            227,
+            982,
+            615
+          ],
+          "plate_bbox": [
+            542,
+            504,
+            776,
+            554
+          ],
+          "corners": [
+            [
+              542,
+              504
+            ],
+            [
+              776,
+              504
+            ],
+            [
+              776,
+              554
+            ],
+            [
+              542,
+              554
+            ]
+          ],
+          "text": "93U62558",
+          "layout": "1_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Bình Phước"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000036",
+      "image_path": "frames\\frame_000036_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            315,
+            217,
+            960,
+            518
+          ],
+          "plate_bbox": [
+            505,
+            429,
+            755,
+            473
+          ],
+          "corners": [
+            [
+              505,
+              429
+            ],
+            [
+              755,
+              429
+            ],
+            [
+              755,
+              473
+            ],
+            [
+              505,
+              473
+            ]
+          ],
+          "text": "66A93657",
+          "layout": "1_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Đồng Tháp"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000037",
+      "image_path": "frames\\frame_000037_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            546,
+            163,
+            1127,
+            458
+          ],
+          "plate_bbox": [
+            729,
+            374,
+            957,
+            412
+          ],
+          "corners": [
+            [
+              729,
+              374
+            ],
+            [
+              957,
+              374
+            ],
+            [
+              957,
+              412
+            ],
+            [
+              729,
+              412
+            ]
+          ],
+          "text": "89NN80143",
+          "layout": "1_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "DIPLOMATIC",
+          "province_name": "Hưng Yên"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000038",
+      "image_path": "frames\\frame_000038_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            692,
+            358,
+            1004,
+            664
+          ],
+          "plate_bbox": [
+            793,
+            566,
+            921,
+            626
+          ],
+          "corners": [
+            [
+              793,
+              566
+            ],
+            [
+              921,
+              566
+            ],
+            [
+              921,
+              626
+            ],
+            [
+              793,
+              626
+            ]
+          ],
+          "text": "77Z785420",
+          "layout": "2_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Bình Định"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000039",
+      "image_path": "frames\\frame_000039_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            478,
+            163,
+            797,
+            500
+          ],
+          "plate_bbox": [
+            567,
+            397,
+            677,
+            453
+          ],
+          "corners": [
+            [
+              567,
+              397
+            ],
+            [
+              677,
+              397
+            ],
+            [
+              677,
+              453
+            ],
+            [
+              567,
+              453
+            ]
+          ],
+          "text": "56D45139",
+          "layout": "2_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "TP. Hồ Chí Minh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000040",
+      "image_path": "frames\\frame_000040_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            669,
+            286,
+            1119,
+            601
+          ],
+          "plate_bbox": [
+            801,
+            513,
+            957,
+            549
+          ],
+          "corners": [
+            [
+              801,
+              513
+            ],
+            [
+              957,
+              513
+            ],
+            [
+              957,
+              549
+            ],
+            [
+              801,
+              549
+            ]
+          ],
+          "text": "16B61956",
+          "layout": "1_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Hải Phòng"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000041",
+      "image_path": "frames\\frame_000041_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            268,
+            244,
+            889,
+            556
+          ],
+          "plate_bbox": [
+            476,
+            461,
+            658,
+            513
+          ],
+          "corners": [
+            [
+              476,
+              461
+            ],
+            [
+              658,
+              461
+            ],
+            [
+              658,
+              513
+            ],
+            [
+              476,
+              513
+            ]
+          ],
+          "text": "32C56276",
+          "layout": "1_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Hà Nội"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000042",
+      "image_path": "frames\\frame_000042_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            728,
+            192,
+            995,
+            578
+          ],
+          "plate_bbox": [
+            820,
+            469,
+            906,
+            517
+          ],
+          "corners": [
+            [
+              820,
+              469
+            ],
+            [
+              906,
+              469
+            ],
+            [
+              906,
+              517
+            ],
+            [
+              820,
+              517
+            ]
+          ],
+          "text": "27U08764",
+          "layout": "2_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Điện Biên"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000043",
+      "image_path": "frames\\frame_000043_OBLIQUE_ANGLE_30_45.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "OBLIQUE_ANGLE_30_45",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            422,
+            149,
+            939,
+            575
+          ],
+          "plate_bbox": [
+            580,
+            446,
+            719,
+            507
+          ],
+          "corners": [
+            [
+              580,
+              446
+            ],
+            [
+              719,
+              461
+            ],
+            [
+              719,
+              501
+            ],
+            [
+              580,
+              507
+            ]
+          ],
+          "text": "78T87286",
+          "layout": "1_LINE",
+          "scenario": "OBLIQUE_ANGLE_30_45",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Phú Yên"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000044",
+      "image_path": "frames\\frame_000044_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            311,
+            224,
+            837,
+            577
+          ],
+          "plate_bbox": [
+            472,
+            476,
+            680,
+            522
+          ],
+          "corners": [
+            [
+              472,
+              476
+            ],
+            [
+              680,
+              476
+            ],
+            [
+              680,
+              522
+            ],
+            [
+              472,
+              522
+            ]
+          ],
+          "text": "TC35845",
+          "layout": "1_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MILITARY",
+          "province_name": null
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000045",
+      "image_path": "frames\\frame_000045_SUNNY_DAYLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "SUNNY_DAYLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            553,
+            354,
+            1066,
+            671
+          ],
+          "plate_bbox": [
+            723,
+            581,
+            881,
+            621
+          ],
+          "corners": [
+            [
+              723,
+              581
+            ],
+            [
+              881,
+              581
+            ],
+            [
+              881,
+              621
+            ],
+            [
+              723,
+              621
+            ]
+          ],
+          "text": "49C32620",
+          "layout": "1_LINE",
+          "scenario": "SUNNY_DAYLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Lâm Đồng"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000046",
+      "image_path": "frames\\frame_000046_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            673,
+            164,
+            931,
+            492
+          ],
+          "plate_bbox": [
+            753,
+            394,
+            845,
+            444
+          ],
+          "corners": [
+            [
+              753,
+              394
+            ],
+            [
+              845,
+              394
+            ],
+            [
+              845,
+              444
+            ],
+            [
+              753,
+              444
+            ]
+          ],
+          "text": "51M91736",
+          "layout": "2_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "TP. Hồ Chí Minh"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000047",
+      "image_path": "frames\\frame_000047_RAINY_WET.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "RAINY_WET",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            444,
+            159,
+            1014,
+            488
+          ],
+          "plate_bbox": [
+            637,
+            362,
+            825,
+            468
+          ],
+          "corners": [
+            [
+              637,
+              362
+            ],
+            [
+              825,
+              362
+            ],
+            [
+              825,
+              468
+            ],
+            [
+              637,
+              468
+            ]
+          ],
+          "text": "11M42550",
+          "layout": "2_LINE",
+          "scenario": "RAINY_WET",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Cao Bằng"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000048",
+      "image_path": "frames\\frame_000048_NIGHT_BACKLIGHT.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "NIGHT_BACKLIGHT",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "motorcycle",
+          "vehicle_bbox": [
+            419,
+            297,
+            1075,
+            589
+          ],
+          "plate_bbox": [
+            639,
+            455,
+            827,
+            593
+          ],
+          "corners": [
+            [
+              639,
+              455
+            ],
+            [
+              827,
+              455
+            ],
+            [
+              827,
+              593
+            ],
+            [
+              639,
+              593
+            ]
+          ],
+          "text": "37K841360",
+          "layout": "2_LINE",
+          "scenario": "NIGHT_BACKLIGHT",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "MOTORCYCLE_OR_LIGHT_TRUCK",
+          "province_name": "Nghệ An"
+        }
+      ]
+    },
+    {
+      "frame_id": "frame_000049",
+      "image_path": "frames\\frame_000049_PARKING_GATE.jpg",
+      "width": 1280,
+      "height": 720,
+      "scenario": "PARKING_GATE",
+      "num_objects": 1,
+      "objects": [
+        {
+          "vehicle_type": "car",
+          "vehicle_bbox": [
+            281,
+            219,
+            937,
+            534
+          ],
+          "plate_bbox": [
+            469,
+            435,
+            727,
+            493
+          ],
+          "corners": [
+            [
+              469,
+              435
+            ],
+            [
+              727,
+              435
+            ],
+            [
+              727,
+              493
+            ],
+            [
+              469,
+              493
+            ]
+          ],
+          "text": "14HC92304",
+          "layout": "1_LINE",
+          "scenario": "PARKING_GATE",
+          "confidence": 1.0,
+          "grammar_valid": true,
+          "plate_type": "SPECIAL",
+          "province_name": "Quảng Ninh"
+        }
+      ]
+    }
+  ]
+}

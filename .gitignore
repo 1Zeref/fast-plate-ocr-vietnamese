@@ -10,6 +10,8 @@ env/
 
 # Datasets and heavy binary files
 data/kaggle_dataset/images/
+data/real_traffic_dataset/frames/
+data/real_traffic_dataset/rectified_crops/
 dataset/
 *.zip
 *.tar.gz
