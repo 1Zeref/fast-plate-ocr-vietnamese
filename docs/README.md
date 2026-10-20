@@ -250,6 +250,7 @@ fast-plate-ocr-vietnamese/
 │   ├── vocab.yaml                    # Cấu hình từ vựng 33 tokens (0-9, A-Z trừ I,O,J,W và pad '_')
 │   └── grammar_schema.yaml           # Bản đồ ngữ pháp, mã tỉnh, mã quân sự, quy tắc DFA
 ├── src/
+│   ├── pipeline.py                   # Unified End-to-End LPR Pipeline kết hợp 2 dataset
 │   ├── decoder/                      # Module giải mã ràng buộc ngữ pháp (Giai đoạn 4)
 │   │   ├── masking.py                # Sinh mặt nạ xác suất DFA & khử xung đột quang học
 │   │   ├── beam_search.py            # Thuật toán Grammar-Guided Beam Search
@@ -280,7 +281,8 @@ fast-plate-ocr-vietnamese/
 │   │   ├── dfa.py                    # DFA validator xác thực và phân loại biển số
 │   │   └── __init__.py
 │   ├── data/                         # Xử lý và chuẩn hóa dữ liệu
-│   │   ├── prepare_kaggle.py         # Pipeline nạp dataset Kaggle topkek69, lọc DFA, tách train/val
+│   │   ├── prepare_kaggle.py         # Pipeline nạp dataset OCR topkek69
+│   │   ├── prepare_detection.py      # Pipeline nạp dataset Detection bomaich
 │   │   └── __init__.py
 │   └── synthetic/                    # Động cơ sinh dữ liệu giả lập (Synthetic Engine)
 │       ├── generator.py              # Sinh chuỗi ngẫu nhiên theo luật
@@ -292,7 +294,8 @@ fast-plate-ocr-vietnamese/
 ├── assets/
 │   └── fonts/                        # Bộ phông chữ chuẩn biển số Việt Nam
 ├── data/
-│   └── kaggle_dataset/               # Dữ liệu Kaggle đã làm sạch (train.csv, val.csv, annotations.csv)
+│   ├── kaggle_dataset/               # Dữ liệu OCR Kaggle topkek69 (11,619 ảnh crop)
+│   └── detection_dataset/            # Dữ liệu Detection Kaggle bomaich (498 ảnh toàn cảnh)
 ├── tests/
 │   ├── test_grammar.py               # Unit test toàn diện không gian ngữ pháp
 │   └── test_synthetic_consistency.py # Test kiểm tra chéo tính đồng bộ giữa Synthetic và DFA

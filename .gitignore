@@ -12,6 +12,7 @@ env/
 data/kaggle_dataset/images/
 data/real_traffic_dataset/frames/
 data/real_traffic_dataset/rectified_crops/
+data/detection_dataset/
 dataset/
 *.zip
 *.tar.gz

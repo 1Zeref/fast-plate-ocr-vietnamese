@@ -50,10 +50,18 @@ class VehiclePlateCornerDataset(Dataset):
 
         with open(self.json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            self.frames = data.get("frames", [])
+            if isinstance(data, dict):
+                self.frames = data.get("frames", [])
+            elif isinstance(data, list):
+                self.frames = data
+            else:
+                self.frames = []
 
         # Lọc các frame có ít nhất 1 biển số
-        self.samples = [f for f in self.frames if f.get("num_objects", 0) > 0]
+        self.samples = [
+            f for f in self.frames
+            if f.get("num_objects", 0) > 0 or f.get("num_plates", 0) > 0 or len(f.get("objects", [])) > 0
+        ]
 
     def __len__(self) -> int:
         return len(self.samples)
@@ -88,8 +96,8 @@ class VehiclePlateCornerDataset(Dataset):
         labels = []
 
         for obj in sample["objects"]:
-            # Bounding box biển số
-            pb = obj["plate_bbox"]
+            # Bounding box biển số (hỗ trợ cả plate_bbox và bbox_xyxy)
+            pb = obj.get("plate_bbox") or obj.get("bbox_xyxy") or [0, 0, orig_w, orig_h]
             p_box_norm = [
                 np.clip(pb[0] * scale_x, 0.0, 1.0),
                 np.clip(pb[1] * scale_y, 0.0, 1.0),
@@ -99,7 +107,14 @@ class VehiclePlateCornerDataset(Dataset):
             plate_boxes.append(p_box_norm)
 
             # 4 điểm góc (Corners)
-            raw_corners = obj["corners"] # [[x1,y1], [x2,y2], [x3,y3], [x4,y4]]
+            raw_corners = obj.get("corners")
+            if not raw_corners:
+                raw_corners = [
+                    [pb[0], pb[1]],
+                    [pb[2], pb[1]],
+                    [pb[2], pb[3]],
+                    [pb[0], pb[3]],
+                ]
             norm_corners = []
             for pt in raw_corners:
                 norm_corners.append([
@@ -109,7 +124,7 @@ class VehiclePlateCornerDataset(Dataset):
             corners_list.append(norm_corners)
 
             # Bounding box phương tiện
-            vb = obj["vehicle_bbox"]
+            vb = obj.get("vehicle_bbox") or pb
             v_box_norm = [
                 np.clip(vb[0] * scale_x, 0.0, 1.0),
                 np.clip(vb[1] * scale_y, 0.0, 1.0),

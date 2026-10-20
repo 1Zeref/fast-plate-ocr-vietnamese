@@ -98,10 +98,26 @@ print(is_valid, meta["military_unit"])  # True, Bộ Tổng Tham mưu - Cơ quan
 py src/data/prepare_kaggle.py
 ```
 
-### 3. Sinh thêm dữ liệu giả lập (Synthetic Engine)
+### 3. Đồng bộ song song 2 bộ dữ liệu Kaggle
 ```bash
-# Sinh 10,000 mẫu thử nghiệm
-py src/synthetic/engine.py --num-samples 10000 --workers 4 --output-dir dataset/synthetic
+# 1. Dataset OCR (topkek69: 11,619 ảnh crop sát mép)
+py src/data/prepare_kaggle.py
+
+# 2. Dataset Detection (bomaich: 498 ảnh toàn cảnh 1080p đường phố Việt Nam)
+py src/data/prepare_detection.py
+```
+
+### 4. Nhận dạng biển số toàn diện End-to-End (Song song 2 mô hình)
+```python
+from src.pipeline import VietnamesePlateOCRPipeline
+
+# Khởi tạo pipeline kết hợp Detector (bomaich) + CCT OCR (topkek69) + Grammar Beam Search
+pipeline = VietnamesePlateOCRPipeline()
+
+# Nhận dạng trực tiếp từ ảnh toàn cảnh camera giao thông 1080p
+results = pipeline.predict("data/detection_dataset/valid/images/clip10_new_1.jpg")
+for r in results:
+    print(f"Biển số: {r['plate_text']} | Độ tin cậy: {r['overall_confidence']*100:.1f}% | Loại biển: {r['plate_type']}")
 ```
 
 ---

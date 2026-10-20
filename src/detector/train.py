@@ -10,6 +10,8 @@ import argparse
 from typing import Dict, Any, Tuple, Optional, List
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 try:
     import torch
@@ -81,6 +83,7 @@ def build_training_targets(targets, grid_size: Tuple[int, int], device: str) -> 
 
 def train_detector(
     json_path: str = "data/real_traffic_dataset/annotations_full.json",
+    dataset_root: Optional[str] = None,
     weights_dir: str = "weights",
     epochs: int = 15,
     batch_size: int = 8,
@@ -109,7 +112,7 @@ def train_detector(
     print(f"{'=' * 65}\n")
 
     # 1. Nạp Dataset & DataLoader
-    dataset = VehiclePlateCornerDataset(json_path=json_path, target_size=(384, 384))
+    dataset = VehiclePlateCornerDataset(json_path=json_path, dataset_root=dataset_root, target_size=(384, 384))
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
 
     # 2. Khởi tạo Mô hình & Loss Function
@@ -187,6 +190,7 @@ def train_detector(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Vehicle & Plate Corner Detector")
     parser.add_argument("--json-path", type=str, default="data/real_traffic_dataset/annotations_full.json")
+    parser.add_argument("--dataset-root", type=str, default=None)
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--lr", type=float, default=1e-3)
@@ -194,6 +198,7 @@ if __name__ == "__main__":
 
     train_detector(
         json_path=args.json_path,
+        dataset_root=args.dataset_root,
         epochs=args.epochs,
         batch_size=args.batch_size,
         lr=args.lr,
