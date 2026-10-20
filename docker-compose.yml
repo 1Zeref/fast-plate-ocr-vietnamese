@@ -35,5 +35,9 @@ services:
       - DEVICE=cuda
       - CONF_THRESHOLD=0.25
 
-    # Lệnh thực thi mặc định: Chạy kiểm tra phần cứng & phân tích dữ liệu trong samples/
-    command: ["evaluate"]
+    # Cổng dịch vụ WebUI
+    ports:
+      - "7860:7860"
+
+    # Lệnh thực thi mặc định: Tự động khởi động Gradio WebUI
+    command: ["webui"]

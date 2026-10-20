@@ -25,4 +25,8 @@ services:
       - DEVICE=cpu
       - CONF_THRESHOLD=0.25
 
-    command: ["evaluate"]
+    # Cổng dịch vụ WebUI
+    ports:
+      - "7860:7860"
+
+    command: ["webui"]

@@ -292,7 +292,14 @@ vidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04 (Python 3.10, PyTorch 2.2 CUDA 12.1
   - ./docs:/app/docs:rw: Tài liệu kỹ thuật dự án.
 - **Kịch bản Khởi động & Kiểm chuẩn:** scripts/entrypoint.sh tự động kiểm tra 
 vidia-smi, xác thực CUDA của PyTorch, chạy bộ kiểm thử pytest tests/ và công cụ demo demo.py.
-- **Hướng dẫn chi tiết:** Xem tại [docs/DOCKER_GUIDE.md](DOCKER_GUIDE.md).
+- **Giao Diện WebUI Tương Tác (Gradio):** Khởi chạy tại cổng 7860 với 4 tab trực quan:
+  1. *Ảnh tĩnh (Image Mode):* Upload ảnh, điều chỉnh ngưỡng, hiển thị kết quả kiểm định DFA.
+  2. *Video bám vết (Video Tracking):* ByteTrack + Hợp nhất đa khung hình Temporal Consensus.
+  3. *Camera trực tiếp (Live Stream):* Hỗ trợ Webcam và camera IP luồng RTSP.
+  4. *Bóc tách chẩn đoán (Explainable AI Inspector):* Bóc tách 4 góc, nắn Homography, Virtual strip, ma trận DFA.
+- **Tài liệu hướng dẫn:**
+  - Hướng dẫn Docker: [docs/DOCKER_GUIDE.md](DOCKER_GUIDE.md).
+  - Hướng dẫn Thử nghiệm WebUI: [docs/USER_TESTING_GUIDE.md](USER_TESTING_GUIDE.md).
 
 ## 13. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 

@@ -20,3 +20,6 @@ onnxscript>=0.1.0
 
 # Quality Assurance & Testing
 pytest>=7.4.0
+
+# WebUI & Interactive Demo
+gradio>=4.0.0

@@ -56,6 +56,7 @@ COPY src/ /app/src/
 COPY tests/ /app/tests/
 COPY scripts/ /app/scripts/
 COPY demo.py /app/demo.py
+COPY app_webui.py /app/app_webui.py
 
 # Khởi tạo các thư mục kết nối mount điểm kiểm chuẩn
 RUN mkdir -p /app/samples /app/output /app/docs && \
@@ -65,8 +66,8 @@ RUN mkdir -p /app/samples /app/output /app/docs && \
 ENV PYTHONPATH=/app \
     USE_ONNX=true
 
-# Cổng dịch vụ tương lai (nếu mở rộng FastAPI RTSP stream)
-EXPOSE 8000
+# Cổng dịch vụ WebUI Gradio và API
+EXPOSE 7860 8000
 
 # Kịch bản khởi động mặc định
 ENTRYPOINT ["/bin/bash", "/app/scripts/entrypoint.sh"]

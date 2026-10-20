@@ -49,6 +49,11 @@ elif [ "$COMMAND" = "bash" ] || [ "$COMMAND" = "sh" ]; then
     echo ">>> Khởi động interactive shell trong container..."
     exec /bin/bash
 
+elif [ "$COMMAND" = "webui" ]; then
+    echo ""
+    echo ">>> [2/3] Khởi chạy Gradio WebUI tại http://0.0.0.0:7860 ..."
+    exec python3 app_webui.py --host 0.0.0.0 --port 7860
+
 elif [ "$COMMAND" = "evaluate" ]; then
     echo ""
     echo ">>> [2/3] Khởi chạy công cụ thực nghiệm ALPR trên thư mục /app/samples..."
