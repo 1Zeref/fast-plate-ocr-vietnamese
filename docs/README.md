@@ -39,10 +39,25 @@ Dự án nghiên cứu, tối ưu hóa và huấn luyện mô hình nhận dạn
     - **Tập Train (85%):** 9,877 mẫu (`data/kaggle_dataset/train.csv`).
     - **Tập Val (15%):** 1,742 mẫu (`data/kaggle_dataset/val.csv`).
 
-### 2.2. Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine)
+### 2.2. Dataset Kaggle: Vietnamese License Plate Detection (bomaich/vnlicenseplate)
+- **Nguồn:** [Kaggle - vnlicenseplate](https://www.kaggle.com/datasets/bomaich/vnlicenseplate)
+- **Tác giả:** [bomaich](https://www.kaggle.com/bomaich)
+- **Phương thức tải tự động:** Thông qua thư viện `kagglehub`:
+  ```python
+  import kagglehub
+  path = kagglehub.dataset_download("bomaich/vnlicenseplate")
+  ```
+- **Quy mô tập dữ liệu:**
+  - Dung lượng tải về: ~237 MB (996 tệp tin gồm ảnh và nhãn txt).
+  - Tổng số ảnh: **498 ảnh** độ phân giải cao (1080p, 720p) chụp toàn cảnh xe cộ thực tế trên đường phố Việt Nam.
+  - Phân chia sẵn: `train` (381 ảnh), `valid` (109 ảnh), `test` (8 ảnh).
+- **Định dạng nhãn:** Định dạng chuẩn YOLO Object Detection (`class_id x_center y_center width height`), nhãn lớp 0 tương ứng với biển số xe (`license plate`).
+- **Vai trò trong hệ thống:** Cung cấp dữ liệu ảnh xe cộ toàn cảnh thực địa cho **Module Định Vị & Phát Hiện Biển Số (Detection - Giai đoạn 2)**, bổ trợ hoàn hảo cho tập dữ liệu OCR `topkek69/vietnamese-license-plate-ocr` (vốn chỉ gồm ảnh crop sát mép biển số).
+
+### 2.3. Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine)
 - Thiết kế tại `src/synthetic/` hỗ trợ sinh tự động từ $300,000 - 500,000$ mẫu ảnh bổ trợ với đầy đủ nhiễu vật lý thực địa (phay kim loại, xước cơ học, đốm bùn, xoay 3D Homography, chói lóa, bóng đổ, nhòe chuyển động).
 
-### 2.3. Dữ Liệu Video Thực Địa, Trích Xuất & Gán Nhãn Đa Điểm (Bước 1.3)
+### 2.4. Dữ Liệu Video Thực Địa, Trích Xuất & Gán Nhãn Đa Điểm (Bước 1.3)
 - **Nguồn & Kịch bản thực tế:**
   - Hệ thống camera giám sát giao thông đường phố (ngã tư, làn cao tốc) và camera kiểm soát xe thông minh tại các bãi đỗ xe (GreenParking, Smart Parking Gates).
   - Bao phủ 5 kịch bản môi trường khắc nghiệt:
