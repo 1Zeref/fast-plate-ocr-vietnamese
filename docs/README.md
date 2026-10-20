@@ -161,7 +161,24 @@ ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhậ
 
 ---
 
-## 7. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+## 7. Bộ Giải Mã Ràng Buộc Ngữ Pháp (Grammar-Guided Beam Search) - Bước 4.1
+
+- **Mục tiêu:** Triệt tiêu hoàn toàn các lỗi nhầm lẫn quang học giữa chữ và số dựa trên ngữ cảnh vị trí địa phương và sê-ri.
+- **Cơ Chế Probability Masking (`src/decoder/masking.py`):**
+  - Tại mỗi bước $t$ giải mã, `DFAPositionMasker` phân tích chuỗi tiền tố đã sinh để xác định chính xác tập ký tự hợp lệ theo quy chuẩn biển số Việt Nam.
+  - Thiết lập mặt nạ log-xác suất ($0.0$ cho ký tự hợp lệ, $-\infty$ cho ký tự vi phạm), triệt tiêu hoàn toàn các nhánh dự đoán sai luật.
+- **Giải Quyết Xung Đột Quang Học Điển Hình:**
+  - $8 \leftrightarrow B$: Tại vị trí sê-ri sau mã tỉnh (ví dụ: `30A`, `30B`), số $8$ bị chặn tuyệt đối $\to$ tự động nắn chỉnh $8 \to B$. Ngược lại ở phần số đăng ký, chữ $B$ bị chặn $\to$ nắn chỉnh $B \to 8$.
+  - $0 \leftrightarrow D$: Tại vị trí sê-ri, số $0$ bị chặn $\to$ chọn chữ $D$. Tại vị trí dãy số thứ tự, chữ $D$ bị chặn $\to$ chọn số $0$.
+  - $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $1 \leftrightarrow T$: Tương tự, tự động phân luồng chính xác dựa vào ngữ cảnh vị trí.
+- **Thuật Toán Beam Search Ràng Buộc (`src/decoder/beam_search.py`):**
+  - Duy trì $K$ giả thuyết có log-likelihood cao nhất (mặc định $K=5$).
+  - Tích hợp kiểm định 100% qua máy trạng thái hữu hạn `VietnamPlateDFA`.
+  - Hỗ trợ giải mã đơn lẻ (`decode_single`) và giải mã theo lô (`decode_batch`).
+
+---
+
+## 8. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -196,7 +213,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 8. Nguồn Phông Chữ & Typography Chuẩn
+## 9. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -210,7 +227,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 9. Cấu Trúc Dự Án (Repository Structure)
+## 10. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
@@ -218,6 +235,10 @@ fast-plate-ocr-vietnamese/
 │   ├── vocab.yaml                    # Cấu hình từ vựng 33 tokens (0-9, A-Z trừ I,O,J,W và pad '_')
 │   └── grammar_schema.yaml           # Bản đồ ngữ pháp, mã tỉnh, mã quân sự, quy tắc DFA
 ├── src/
+│   ├── decoder/                      # Module giải mã ràng buộc ngữ pháp (Giai đoạn 4)
+│   │   ├── masking.py                # Sinh mặt nạ xác suất DFA & khử xung đột quang học
+│   │   ├── beam_search.py            # Thuật toán Grammar-Guided Beam Search
+│   │   └── __init__.py
 │   ├── ocr/                          # Module nhận dạng ký tự quang học CCT (Giai đoạn 3)
 │   │   ├── cct_adapter.py            # Kiến trúc CCT, Positional Embedding & Multi-Head Decoder
 │   │   ├── augment.py                # Screw Cutout, Motion Blur, Photometric Augmentations

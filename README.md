@@ -46,18 +46,23 @@ Nhận dạng ký tự quang học biển số xe Việt Nam (LPR/OCR) tốc đ�
      - **Photometric Distortions:** Biến dạng ánh sáng, tương phản và nhiễu hạt cảm biến ISO cao.
    - Trọng số tối ưu hóa lưu tại weights/fast_plate_ocr_vn.pt (~2.18 MB).
 
-7. **Thu thập, Chọn lọc & Gán nhãn Thực địa Đa Điều Kiện (Bước 1.3):**
+7. **Bộ Giải Mã Ràng Buộc Ngữ Pháp - Grammar-Guided Beam Search (Bước 4.1):**
+   - Thuật toán giải mã Beam Search có mặt nạ xác suất (Probability Masking) tích hợp trực tiếp Máy trạng thái hữu hạn DFA.
+   - Triệt tiêu 100% các xung đột quang học phổ biến: $8 \leftrightarrow B$ (tự động chọn chữ cái ở slot sê-ri và chữ số ở dãy số), $0 \leftrightarrow D$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $1 \leftrightarrow T$.
+   - Xuất chuỗi đảm bảo 100% tuân thủ quy chuẩn pháp lý và phân loại biển số tức thời.
+
+8. **Thu thập, Chọn lọc & Gán nhãn Thực địa Đa Điều Kiện (Bước 1.3):**
    - Bộ trích xuất video thông minh (`VideoFrameSampler`): Lọc frame tĩnh, loại bỏ chuyển động nhòe mờ bằng Laplacian Variance Filter ($\text{Threshold} = 85.0$).
    - Nhận diện 5 kịch bản thực địa: Nắng gắt (`SUNNY_DAYLIGHT`), Ngược sáng ban đêm (`NIGHT_BACKLIGHT`), Mưa ẩm (`RAINY_WET`), Góc xiên $30^\circ - 45^\circ$ (`OBLIQUE_ANGLE_30_45`), Cổng bãi đỗ xe (`PARKING_GATE`).
    - Định dạng nhãn chuẩn 5 trường: Bounding box phương tiện, Bounding box biển số, Tọa độ 4 điểm góc $(x_1, y_1) \dots (x_4, y_4)$, chuỗi ký tự OCR và cờ phân loại (`1_LINE` / `2_LINE`).
    - Hỗ trợ giải thuật nắn phẳng xạ ảnh 4 góc (`rectify_plate_quad`) chuyển đổi biển số góc xiên về kích thước chuẩn trước khi đưa vào OCR.
    - Xuất dữ liệu đa chuẩn: JSON phân cấp đầy đủ, CSV phẳng cho OCR và YOLO-OBB.
 
-8. **Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine):**
+9. **Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine):**
    - Sinh từ 300,000 – 500,000 mẫu ảnh biển số bổ trợ với tốc độ >150 ảnh/giây.
    - Mô phỏng đầy đủ hiệu ứng vật lý thực địa: phay xước nhôm, vết cào rách, đốm bùn đất, xoay xạ ảnh 3D (Homography), chói lóa ánh nắng/đèn pha, bóng đổ, nhòe chuyển động và nhiễu cảm biến camera.
 
-9. **Tài liệu nguồn minh bạch:**
+10. **Tài liệu nguồn minh bạch:**
    - Đầy đủ nguồn gốc tra cứu tại [`docs/README.md`](docs/README.md).
 
 ---

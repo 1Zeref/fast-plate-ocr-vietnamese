@@ -255,15 +255,29 @@ class CCTPlateVietnamModel(nn.Module if HAS_TORCH else object):
         logits = self.classifier(x_seq)
         return logits
 
-    def decode(self, logits) -> List[Dict[str, Any]]:
+    def decode(
+        self,
+        logits,
+        use_grammar_beam_search: bool = False,
+        beam_width: int = 5,
+    ) -> List[Dict[str, Any]]:
         """
         Giải mã tensor logits [B, 10, 33] thành chuỗi biển số text hoàn chỉnh:
-        - Sử dụng Greedy Decoding (argmax).
-        - Loại bỏ ký tự đệm padding '_'.
-        - Tính điểm tin cậy trung bình (Softmax confidence).
+        - Greedy Decoding (nếu use_grammar_beam_search=False)
+        - Grammar-Guided Beam Search (nếu use_grammar_beam_search=True, Bước 4.1):
+          Áp dụng Probability Masking và DFA để triệt tiêu các lỗi nhầm lẫn quang học.
         """
         if not HAS_TORCH:
             return []
+
+        if use_grammar_beam_search:
+            from src.decoder.beam_search import GrammarGuidedBeamSearchDecoder
+            decoder = GrammarGuidedBeamSearchDecoder(
+                alphabet=self.alphabet,
+                pad_char=self.pad_char,
+                max_slots=self.max_plate_slots,
+            )
+            return decoder.decode_batch(logits, beam_width=beam_width, apply_grammar=True)
 
         probs = F.softmax(logits, dim=-1)
         confidences, predictions = torch.max(probs, dim=-1)
