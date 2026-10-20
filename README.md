@@ -31,18 +31,25 @@ Nhận dạng ký tự quang học biển số xe Việt Nam (LPR/OCR) tốc đ�
    - Định tuyến hình học (Geometry Router) phân luồng biển `1-line` (dài) và `2-line` (vuông) dựa trên tỷ lệ Aspect Ratio (ngưỡng 2.40) kết hợp mô hình học sâu.
    - Thuật toán cắt tách dòng và nối không gian thành dải 1 dòng đơn giả lập (**Virtual 1-Line Strip Generator**) bằng phân tích biểu đồ chiếu ngang (Horizontal Projection Profile), giúp các mô hình OCR 1 dòng nhận diện biển 2 dòng chính xác 100%.
 
-5. **Thu thập, Chọn lọc & Gán nhãn Thực địa Đa Điều Kiện (Bước 1.3):**
+5. **Mô Hình Nhận Dạng Ký Tự CCT Adapter (Bước 3.1):**
+   - Kiến trúc Compact Convolutional Transformer (CCT) chuyên biệt hóa cho biển số xe Việt Nam.
+   - Đầu vào chuẩn hóa 64x256x3, Convolutional Tokenizer sinh ra 1024 patch tokens kết hợp Sequence Pooling chiếu nén thành đúng 10 slot tokens đại diện cho 10 vị trí ký tự tối đa.
+   - Vector nhúng vị trí có thể học được (1D Learnable Positional Embedding) duy trì trật tự không gian trái-sang-phải.
+   - 4 tầng Transformer Encoder với Multi-Head Attention (4 heads) trích xuất ngữ cảnh liên ký tự hiệu quả cao.
+   - Multi-Head Classifier 10 heads dự đoán song song trên tập từ điển 33 tokens hợp lệ, kèm Greedy Sequence Decoder tích hợp kiểm định ngữ pháp DFA trực tiếp.
+
+6. **Thu thập, Chọn lọc & Gán nhãn Thực địa Đa Điều Kiện (Bước 1.3):**
    - Bộ trích xuất video thông minh (`VideoFrameSampler`): Lọc frame tĩnh, loại bỏ chuyển động nhòe mờ bằng Laplacian Variance Filter ($\text{Threshold} = 85.0$).
    - Nhận diện 5 kịch bản thực địa: Nắng gắt (`SUNNY_DAYLIGHT`), Ngược sáng ban đêm (`NIGHT_BACKLIGHT`), Mưa ẩm (`RAINY_WET`), Góc xiên $30^\circ - 45^\circ$ (`OBLIQUE_ANGLE_30_45`), Cổng bãi đỗ xe (`PARKING_GATE`).
    - Định dạng nhãn chuẩn 5 trường: Bounding box phương tiện, Bounding box biển số, Tọa độ 4 điểm góc $(x_1, y_1) \dots (x_4, y_4)$, chuỗi ký tự OCR và cờ phân loại (`1_LINE` / `2_LINE`).
    - Hỗ trợ giải thuật nắn phẳng xạ ảnh 4 góc (`rectify_plate_quad`) chuyển đổi biển số góc xiên về kích thước chuẩn trước khi đưa vào OCR.
    - Xuất dữ liệu đa chuẩn: JSON phân cấp đầy đủ, CSV phẳng cho OCR và YOLO-OBB.
 
-6. **Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine):**
+7. **Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine):**
    - Sinh từ 300,000 – 500,000 mẫu ảnh biển số bổ trợ với tốc độ >150 ảnh/giây.
    - Mô phỏng đầy đủ hiệu ứng vật lý thực địa: phay xước nhôm, vết cào rách, đốm bùn đất, xoay xạ ảnh 3D (Homography), chói lóa ánh nắng/đèn pha, bóng đổ, nhòe chuyển động và nhiễu cảm biến camera.
 
-7. **Tài liệu nguồn minh bạch:**
+8. **Tài liệu nguồn minh bạch:**
    - Đầy đủ nguồn gốc tra cứu tại [`docs/README.md`](docs/README.md).
 
 ---

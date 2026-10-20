@@ -1,0 +1,88 @@
+# ==============================================================================
+# FAST-PLATE-OCR-VIETNAMESE: CCT PLATE & MODEL CONFIGURATION
+# Cấu hình kiến trúc Compact Convolutional Transformer (CCT) cho Biển số Việt Nam
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. THÔNG SỐ BIỂN SỐ VÀ TỪ VỰNG (PLATE & VOCABULARY PARAMETERS)
+# ------------------------------------------------------------------------------
+# Chiều dài chuỗi tối đa: Biển dài nhất (Ngoại giao) là 9 ký tự (ví dụ: 80NG16601)
+# Đặt max_plate_slots = 10 (có dự phòng slot đệm cho các biến thể đặc biệt)
+max_plate_slots: 10
+
+# Bảng ký tự phân loại hoàn chỉnh cho 10 classification heads (33 tokens)
+# Gồm 10 chữ số (0-9) + 22 chữ cái hợp lệ + 1 ký tự padding ('_')
+alphabet: "0123456789ABCDEFGHKLMNPQRSTUVXYZ_"
+
+# Ký tự đệm cho các biển có độ dài nhỏ hơn max_plate_slots (bắt buộc nằm trong alphabet)
+pad_char: "_"
+blank_char: ""
+
+# ------------------------------------------------------------------------------
+# 2. ĐỊNH DẠNG TENSOR HÌNH ẢNH ĐẦU VÀO (INPUT IMAGE TENSOR SPECIFICATION)
+# ------------------------------------------------------------------------------
+# Kích thước tensor sau khi qua Module Nắn phối cảnh & Router (Bước 2.2)
+img_height: 64
+img_width: 256
+channels: 3
+image_color_mode: "rgb"
+interpolation: "linear"
+keep_aspect_ratio: false
+
+# ------------------------------------------------------------------------------
+# 3. KIẾN TRÚC MẠNG COMPACT CONVOLUTIONAL TRANSFORMER (CCT ARCHITECTURE)
+# ------------------------------------------------------------------------------
+cct_model:
+  name: "cct_vietnam_s_v2"
+  
+  # Convolutional Tokenizer: Biến đổi tensor ảnh 64x256 thành chuỗi spatial patch tokens
+  conv_tokenizer:
+    kernel_size: [3, 3]
+    stride: [2, 2]
+    padding: [1, 1]
+    pooling_kernel_size: [3, 3]
+    pooling_stride: [2, 2]
+    activation: "relu"
+    use_batch_norm: true
+
+  # Kích thước không gian vector nhúng đặc trưng (Transformer Embedding Dimension)
+  embedding_dim: 128
+
+  # Tầng nhúng vị trí (Positional Embedding):
+  # Định tuyến thứ tự không gian từ trái qua phải tương ứng với 10 vị trí ký tự
+  positional_embedding:
+    enabled: true
+    type: "learnable_1d"
+    sequence_length: 10
+    dropout_rate: 0.1
+
+  # Cấu trúc khối Transformer Encoder:
+  transformer_encoder:
+    num_layers: 4             # Số tầng Transformer Encoder blocks
+    num_heads: 4              # Số attention heads trong Multi-Head Self-Attention
+    mlp_ratio: 2.0            # Tỷ lệ mở rộng của Feed-Forward Network (FFN)
+    attention_dropout: 0.1
+    projection_dropout: 0.1
+    stochastic_depth_rate: 0.1 # DropPath regularization
+
+  # Cơ chế Multi-Head Sequence Decoding:
+  # Xuất ra 10 Linear Classification Heads song song (mỗi head phân loại 33 classes)
+  decoder_heads:
+    num_heads: 10
+    num_classes: 33
+    pooling_type: "sequence_pooling"
+    use_classifier_dropout: true
+    classifier_dropout: 0.15
+
+# ------------------------------------------------------------------------------
+# 4. THÔNG SỐ HUẤN LUYỆN KHUYẾN NGHỊ (RECOMMENDED TRAINING HYPERPARAMETERS)
+# ------------------------------------------------------------------------------
+training_params:
+  batch_size: 64
+  epochs: 30
+  optimizer: "AdamW"
+  base_lr: 0.001
+  weight_decay: 0.0001
+  lr_scheduler: "CosineAnnealingLR"
+  min_lr: 0.00001
+  label_smoothing: 0.05

@@ -116,7 +116,30 @@ ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhậ
 
 ---
 
-## 5. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+---
+
+## 5. Thiết Lập Cấu Hình & Adapter Mạng CCT (Bước 3.1)
+
+- **Mục tiêu:** Đồng bộ hóa kiến trúc Compact Convolutional Transformer (CCT) với định dạng biển số xe Việt Nam.
+- **Tệp Cấu Hình Mô Hình (`configs/plate_config_vietnam.yaml`):**
+  - `max_plate_slots`: 10 (đáp ứng trọn vẹn toàn bộ các biển từ 6 đến 9 ký tự, có khe đệm cho biến thể đặc thù).
+  - `alphabet`: 33 tokens gồm 10 chữ số + 22 chữ cái Latinh hợp lệ + ký tự đệm `_` (`0123456789ABCDEFGHKLMNPQRSTUVXYZ_`).
+  - `pad_char`: `"_"`
+  - `img_height`: 64, `img_width`: 256, `channels`: 3 (chuẩn hóa tương thích 100% với đầu ra sau khi nắn phối cảnh ở Bước 2.2).
+- **Kiến Trúc CCT Adapter (`src/ocr/cct_adapter.py`):**
+  - **Convolutional Tokenizer:** Lớp Conv2D ($3 \times 3$, stride 2) kết hợp MaxPool ($3 \times 3$, stride 2) chuyển đổi ảnh $64 \times 256$ thành chuỗi spatial patch tokens kích thước $1024 \times 128$.
+  - **Sequence Pooling:** Chiếu chuỗi spatial tokens thành đúng 10 slot tokens đại diện cho 10 vị trí ký tự.
+  - **Learnable Positional Embedding 1D:** Lớp vector nhúng vị trí có thể học được kích thước $(1, 10, 128)$ định hướng trật tự không gian trái-qua-phải của các ký tự.
+  - **Transformer Encoder Blocks (4 tầng):** Mỗi tầng gồm LayerNorm + Multi-Head Self-Attention ($4$ attention heads) + Feed-Forward MLP ($2.0\times$ expansion).
+  - **Multi-Head Classifier:** Chiếu vector đặc trưng $D=128$ ra 33 classes song song trên 10 heads, xuất ra tensor Logits có kích thước chuẩn tắc $[B, 10, 33]$.
+  - **Greedy Sequence Decoder:** Lấy argmax trên từng slot, tự động loại bỏ ký tự padding `_`, tính toán điểm tin cậy trung bình và kiểm định cú pháp trực tiếp qua DFA.
+- **Tài Liệu Nghiên Cứu Tham Khảo:**
+  - *Escaping the Big Data Paradigm with Compact Transformers* (Hassani et al., CCT paper).
+  - *fast-plate-ocr* architecture (ankandrew/fast-plate-ocr).
+
+---
+
+## 6. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -151,7 +174,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 6. Nguồn Phông Chữ & Typography Chuẩn
+## 7. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -165,7 +188,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 7. Cấu Trúc Dự Án (Repository Structure)
+## 8. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
@@ -173,6 +196,9 @@ fast-plate-ocr-vietnamese/
 │   ├── vocab.yaml                    # Cấu hình từ vựng 33 tokens (0-9, A-Z trừ I,O,J,W và pad '_')
 │   └── grammar_schema.yaml           # Bản đồ ngữ pháp, mã tỉnh, mã quân sự, quy tắc DFA
 ├── src/
+│   ├── ocr/                          # Module nhận dạng ký tự quang học CCT (Giai đoạn 3)
+│   │   ├── cct_adapter.py            # Kiến trúc CCT, Positional Embedding & Multi-Head Decoder
+│   │   └── __init__.py
 │   ├── rectification/                # Module nắn phối cảnh & định tuyến (Bước 2.2)
 │   │   ├── homography.py             # Sắp xếp 4 góc & nắn phẳng ma trận Homography
 │   │   ├── router.py                 # Định tuyến hình học (1-line vs 2-line)
