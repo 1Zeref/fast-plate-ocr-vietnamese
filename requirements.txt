@@ -23,3 +23,7 @@ pytest>=7.4.0
 
 # WebUI & Interactive Demo
 gradio>=4.0.0
+
+# Utilities & Dataset Ingestion
+tqdm>=4.65.0
+kagglehub>=0.2.0

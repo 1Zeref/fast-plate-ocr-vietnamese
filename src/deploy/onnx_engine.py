@@ -63,7 +63,11 @@ def create_session(model_path: str, num_threads: Optional[int] = None) -> "ort.I
 
     providers = get_optimal_providers()
     logger.info("Khởi tạo ONNX session cho [%s] với Providers: %s", os.path.basename(model_path), providers)
-    return ort.InferenceSession(model_path, sess_options=opts, providers=providers)
+    try:
+        return ort.InferenceSession(model_path, sess_options=opts, providers=providers)
+    except Exception as e:
+        logger.warning("Không thể khởi tạo ONNX session với providers %s (%s). Fallback sang CPUExecutionProvider.", providers, e)
+        return ort.InferenceSession(model_path, sess_options=opts, providers=["CPUExecutionProvider"])
 
 
 class ONNXPlateDetector:

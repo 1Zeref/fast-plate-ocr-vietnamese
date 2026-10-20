@@ -17,7 +17,11 @@ if hasattr(sys.stdout, "reconfigure"):
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-import kagglehub
+try:
+    import kagglehub
+    HAS_KAGGLEHUB = True
+except ImportError:
+    HAS_KAGGLEHUB = False
 from src.grammar.dfa import VietnamPlateDFA
 
 
