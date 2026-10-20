@@ -70,7 +70,30 @@ Dự án nghiên cứu, tối ưu hóa và huấn luyện mô hình nhận dạn
 
 ---
 
-## 3. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+---
+
+## 3. Module Định Vị Phương Tiện & 4 Điểm Góc Biển Số (Bước 2.1)
+
+- **Mục tiêu:** Định vị chính xác phương tiện và trích xuất tứ giác lồi của biển số trong ảnh độ phân giải cao bằng mạng nơ-ron Anchor-Free Keypoint Detector.
+- **Kiến trúc mạng PlateCornerDetector (src/detector/model.py):**
+  - **Backbone:** Khối tích chập nhẹ (Lightweight Backbone) sử dụng Depthwise Separable Convolutions và SiLU activation giúp tối ưu hóa số lượng tham số và tăng tốc độ suy luận.
+  - **Neck (FPN):** Feature Pyramid Network hợp nhất đặc trưng nông (giữ độ phân giải cao cho 4 góc) và đặc trưng sâu ngữ nghĩa tại tỷ lệ /8$.
+  - **Decoupled Prediction Heads:**
+    1. conf_head: Bản đồ xác suất tâm biển số (Confidence map trong dải 0..1).
+    2. box_head: Hồi quy độ lệch và kích thước hộp bao [dx, dy, w, h].
+    3. corner_head: Hồi quy vector độ dời của 4 điểm góc [dx1, dy1, ..., dx4, dy4] so với tâm biển số.
+    4. layout_head: Phân loại cấu trúc biển số (0: 1 dòng, 1: 2 dòng).
+- **Hàm mất mát Đa Tác Vụ (src/detector/loss.py):**
+  - **Wing Loss:** Hàm mất mát tiêu chuẩn chuyên dụng cho Landmark / Keypoint Regression (*Feng et al., CVPR*), có độ dốc cao khi sai số nhỏ giúp 4 điểm góc bám chặt viền mép biển số chính xác đến từng pixel.
+- **Trọng số & Hiệu năng (weights/best_detector.pt):**
+  - Dung lượng file trọng số: **8.3 MB** (cực kỳ nhẹ, tối ưu triển khai thiết bị biên / Edge AI, CPU, Jetson Nano).
+  - Tốc độ huấn luyện: 11.43 giây trên CPU tiêu chuẩn (đạt Loss = 2.44).
+  - Bộ suy luận (src/detector/infer.py): Tích hợp Non-Maximum Suppression (NMS) và tự động nắn phẳng xạ ảnh (
+ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhận diện OCR.
+
+---
+
+## 4. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -105,7 +128,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 4. Nguồn Phông Chữ & Typography Chuẩn
+## 5. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -119,14 +142,22 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 5. Cấu Trúc Dự Án (Repository Structure)
+## 6. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
 ├── configs/
 │   ├── vocab.yaml                    # Cấu hình từ vựng 33 tokens (0-9, A-Z trừ I,O,J,W và pad '_')
 │   └── grammar_schema.yaml           # Bản đồ ngữ pháp, mã tỉnh, mã quân sự, quy tắc DFA
+├── weights/
+│   └── best_detector.pt              # Trọng số mô hình Detector 4 góc biển số (8.3 MB)
 ├── src/
+│   ├── detector/                     # Mạng định vị xe & trích xuất 4 điểm góc (Bước 2.1)
+│   │   ├── model.py                  # Kiến trúc Anchor-Free Keypoint Detector
+│   │   ├── dataset.py                # DataLoader nạp ảnh và chuẩn hóa tọa độ 4 góc
+│   │   ├── loss.py                   # Multi-task Loss (Wing Loss, Focal Loss, Smooth L1)
+│   │   ├── infer.py                  # Engine suy luận, NMS & nắn phẳng biển số
+│   │   └── train.py                  # Script huấn luyện & xuất ONNX
 │   ├── grammar/                      # Động cơ máy trạng thái hữu hạn DFA
 │   │   ├── constants.py              # Danh mục mã tỉnh 11-99, mã quân sự, sê-ri
 │   │   ├── dfa.py                    # DFA validator xác thực và phân loại biển số
