@@ -1,0 +1,127 @@
+# FAST-PLATE-OCR-VIETNAMESE: TÀI LIỆU NGUỒN VÀ QUY CHUẨN KỸ THUẬT
+
+Dự án nghiên cứu, tối ưu hóa và huấn luyện mô hình nhận dạng ký tự quang học biển số xe Việt Nam (Optical Character Recognition - OCR) tốc độ cao dựa trên kiến trúc **Compact Convolutional Transformer (CCT)** và mạng nơ-ron tích chập đa đầu ra.
+
+---
+
+## 1. Nguồn Mã Nguồn Gốc & Kiến Trúc Mô Hình (Original Source Code)
+
+- **Dự án tham khảo:** [fast-plate-ocr](https://github.com/ankandrew/fast-plate-ocr)
+- **Tác giả:** Andrés ([ankandrew](https://github.com/ankandrew))
+- **Mô tả kiến trúc:**
+  - Mô hình nhận diện ký tự dựa trên kiến trúc nhẹ CCT (Compact Convolutional Transformer) hoặc CNN Backbone kết hợp nhiều đầu phân loại (multi-head classification) tương ứng với từng slot ký tự trên biển số.
+  - Hỗ trợ tối ưu hóa ONNX Runtime, TensorRT và OpenVINO cho tốc độ suy luận dưới $2\text{ms}$ trên CPU/GPU.
+  - Sử dụng tệp cấu hình `vocab.yaml` và `plate_config.yaml` định nghĩa `alphabet`, `pad_char`, `max_plate_slots`, `img_height`, `img_width`.
+
+---
+
+## 2. Nguồn Dữ Liệu Thực Tế (Dataset Sources)
+
+### 2.1. Dataset Kaggle: Vietnamese License Plate OCR
+- **Nguồn:** [Kaggle - vietnamese-license-plate-ocr](https://www.kaggle.com/datasets/topkek69/vietnamese-license-plate-ocr)
+- **Tác giả:** [topkek69](https://www.kaggle.com/topkek69)
+- **Phương thức tải tự động:** Thông qua thư viện `kagglehub`:
+  ```python
+  import kagglehub
+  path = kagglehub.dataset_download("topkek69/vietnamese-license-plate-ocr")
+  ```
+- **Quy mô tập dữ liệu gốc:**
+  - Thư mục `cropped/`: 6,643 ảnh biển số thực tế cắt từ camera giao thông.
+  - Thư mục `generated/`: 5,547 ảnh biển số tổng hợp đa dạng điều kiện.
+  - Tổng số mẫu gốc: **12,190 ảnh**.
+  - File nhãn gốc: `crop_labels.csv` và `gen_labels.csv` gồm các trường `Name`, `Label`, `Type`.
+- **Quy trình làm sạch & Chuẩn hóa qua DFA:**
+  - Áp dụng bộ lọc ngữ pháp pháp lý (Máy trạng thái hữu hạn DFA - Bước 1.1) tại `src/data/prepare_kaggle.py`.
+  - Tự động khắc phục các lỗi typo gán nhãn phổ biến (nhầm chữ `O` thành số `0`, chữ `I` thành số `1`).
+  - Loại bỏ **571 mẫu** lỗi gán nhãn sai hoặc ảnh bị crop cụt mất mã tỉnh/sê-ri.
+  - Tổng số mẫu đạt chuẩn pháp lý: **11,619 mẫu (95.32%)**.
+  - Phân chia tập dữ liệu chuẩn:
+    - **Tập Train (85%):** 9,877 mẫu (`data/kaggle_dataset/train.csv`).
+    - **Tập Val (15%):** 1,742 mẫu (`data/kaggle_dataset/val.csv`).
+
+### 2.2. Động cơ Sinh Dữ liệu Giả lập (Synthetic Data Engine)
+- Thiết kế tại `src/synthetic/` hỗ trợ sinh tự động từ $300,000 - 500,000$ mẫu ảnh bổ trợ với đầy đủ nhiễu vật lý thực địa (phay kim loại, xước cơ học, đốm bùn, xoay 3D Homography, chói lóa, bóng đổ, nhòe chuyển động).
+
+---
+
+## 3. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+
+Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
+
+1. **Thông tư số 24/2023/TT-BCA** (Bộ Công an, ban hành ngày 01/07/2023, có hiệu lực từ 15/08/2023):
+   - Quy định về cấp, thu hồi đăng ký, biển số xe cơ giới.
+   - Quy định biển số định danh theo mã định danh cá nhân / CCCD.
+   - Điều 37 & Phụ lục số 02: Quy định dải ký hiệu mã tỉnh thành từ 11 đến 99 (loại trừ các số chưa cấp: 13, 41, 42, 44, 45, 46, 87, 91, 96).
+   - Quy định 20 chữ cái dân sự tiêu chuẩn: `A, B, C, D, E, F, G, H, K, L, M, N, P, S, T, U, V, X, Y, Z` (loại trừ `I, O, J, W`).
+   - Mở rộng sê-ri 2 chữ cái liên tiếp cho ô tô và mô tô.
+
+2. **Thông tư số 58/2020/TT-BCA** (Bộ Công an, ban hành ngày 16/06/2020):
+   - Quy định về quy trình cấp, thu hồi đăng ký, biển số phương tiện giao thông cơ giới đường bộ.
+   - Quy cách kích thước biển số:
+     - Biển số dài: Chiều cao 110 mm, chiều dài 520 mm.
+     - Biển số ngắn (vuông): Chiều cao 165 mm, chiều dài 330 mm.
+   - Quy định bố cục dòng 1 và dòng 2 đối với biển số xe máy và ô tô biển vuông.
+
+3. **Thông tư số 169/2021/TT-BQP** (Bộ Quốc phòng, ban hành ngày 23/12/2021):
+   - Quy định về đăng ký, quản lý, sử dụng xe cơ giới, xe máy chuyên dùng trong Bộ Quốc phòng.
+   - Phụ lục III: Danh mục ký hiệu chữ cái viết tắt của các cơ quan, đơn vị quân sự (Biển đỏ quân đội):
+     - Cơ quan BQP & Tổng cục: `TM, TC, TH, TT, TK, TN`.
+     - Quân khu, Quân chủng, Bộ Tư lệnh: `KA, KB, KC, KD, KV, KP, KK, KT, QA, QH, QB, QC, QM, BL`.
+     - Binh chủng: `BB, BC, BK, BP, BH, BT`.
+     - Quân đoàn & Học viện: `AA, AB, AC, AD, HA, HB, HC, HE, HD, HH, HT`.
+     - Doanh nghiệp quân đội & Binh đoàn: `VT (Viettel), CB (MB Bank), CA, CD, CH, CM, CN, CP, CT, CV, AV, AT, AN, AX, AM`.
+
+4. **Quy định biển số Ngoại giao & Tổ chức Quốc tế:**
+   - Sê-ri `NG`: Đại sứ quán, viên chức ngoại giao.
+   - Sê-ri `QT`: Tổ chức quốc tế (UN, WHO, v.v.).
+   - Sê-ri `NN`: Tổ chức, cá nhân nước ngoài.
+   - Sê-ri `CV`: Nhân viên hành chính kỹ thuật cơ quan ngoại giao.
+
+---
+
+## 4. Nguồn Phông Chữ & Typography Chuẩn
+
+1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
+   - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
+   - Bản sao chép cục bộ: `assets/fonts/plate_square_modern.ttf`.
+   - Đặc điểm: Đường nét đều đặn, góc bo bán kính hẹp, khoảng cách ký tự đồng nhất, tương thích quy chuẩn dập khuôn Thông tư 58/2020 và 24/2023.
+
+2. **Phông chữ nét tròn truyền thống (Classic Round Font):**
+   - Tiêu chuẩn: Arial Bold (`arialbd.ttf`) & Arial Narrow Bold (`ARIALNB.TTF`).
+   - Bản sao chép cục bộ: `assets/fonts/plate_round_bold.ttf`, `assets/fonts/plate_round_narrow.ttf`.
+   - Đặc điểm: Đường cong bo tròn rộng, phù hợp mô phỏng các thế hệ biển số 4 số cũ và biển 5 số giai đoạn trước 2020.
+
+---
+
+## 5. Cấu Trúc Dự Án (Repository Structure)
+
+```text
+fast-plate-ocr-vietnamese/
+├── configs/
+│   ├── vocab.yaml                    # Cấu hình từ vựng 33 tokens (0-9, A-Z trừ I,O,J,W và pad '_')
+│   └── grammar_schema.yaml           # Bản đồ ngữ pháp, mã tỉnh, mã quân sự, quy tắc DFA
+├── src/
+│   ├── grammar/                      # Động cơ máy trạng thái hữu hạn DFA
+│   │   ├── constants.py              # Danh mục mã tỉnh 11-99, mã quân sự, sê-ri
+│   │   ├── dfa.py                    # DFA validator xác thực và phân loại biển số
+│   │   └── __init__.py
+│   ├── data/                         # Xử lý và chuẩn hóa dữ liệu
+│   │   ├── prepare_kaggle.py         # Pipeline nạp dataset Kaggle topkek69, lọc DFA, tách train/val
+│   │   └── __init__.py
+│   └── synthetic/                    # Động cơ sinh dữ liệu giả lập (Synthetic Engine)
+│       ├── generator.py              # Sinh chuỗi ngẫu nhiên theo luật
+│       ├── renderer.py               # Kết xuất phôi biển và đinh ốc
+│       ├── textures.py               # Sinh texture kim loại, trầy xước, bùn đất
+│       ├── augmentor.py              # Xoay 3D Homography, chói lóa, nhòe, nhiễu
+│       ├── engine.py                 # Động cơ sinh dữ liệu đa tiến trình
+│       └── __init__.py
+├── assets/
+│   └── fonts/                        # Bộ phông chữ chuẩn biển số Việt Nam
+├── data/
+│   └── kaggle_dataset/               # Dữ liệu Kaggle đã làm sạch (train.csv, val.csv, annotations.csv)
+├── tests/
+│   ├── test_grammar.py               # Unit test toàn diện không gian ngữ pháp
+│   └── test_synthetic_consistency.py # Test kiểm tra chéo tính đồng bộ giữa Synthetic và DFA
+└── docs/
+    └── README.md                     # Tài liệu tham khảo và nguồn dữ liệu chi tiết
+```

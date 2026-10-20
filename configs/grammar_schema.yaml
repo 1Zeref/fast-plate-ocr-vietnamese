@@ -1,0 +1,432 @@
+# ==============================================================================
+# FAST-PLATE-OCR-VIETNAMESE: GRAMMAR SCHEMA & DFA SPECIFICATION
+# Bản đồ ngữ pháp và Máy trạng thái hữu hạn cho biển số xe Việt Nam
+# ==============================================================================
+
+meta:
+  name: "Vietnam License Plate Grammar Schema"
+  version: "1.0.0"
+  legal_references:
+    - "Thông tư số 24/2023/TT-BCA (Bộ Công an)"
+    - "Thông tư số 58/2020/TT-BCA (Bộ Công an - lưu hành song song)"
+    - "Thông tư số 169/2021/TT-BQP (Bộ Quốc phòng)"
+
+# ------------------------------------------------------------------------------
+# 1. DANH MỤC MÃ ĐỊA PHƯƠNG HỢP LỆ (PROVINCE CODES: 11 - 99)
+# ------------------------------------------------------------------------------
+# Các mã số chưa được cấp / dự trữ: 13, 41, 42, 44, 45, 46, 87, 91, 96
+valid_province_codes:
+  "11": "Cao Bằng"
+  "12": "Lạng Sơn"
+  "14": "Quảng Ninh"
+  "15": "Hải Phòng"
+  "16": "Hải Phòng"
+  "17": "Thái Bình"
+  "18": "Nam Định"
+  "19": "Phú Thọ"
+  "20": "Thái Nguyên"
+  "21": "Yên Bái"
+  "22": "Tuyên Quang"
+  "23": "Hà Giang"
+  "24": "Lào Cai"
+  "25": "Lai Châu"
+  "26": "Sơn La"
+  "27": "Điện Biên"
+  "28": "Hòa Bình"
+  "29": "Hà Nội"
+  "30": "Hà Nội"
+  "31": "Hà Nội"
+  "32": "Hà Nội"
+  "33": "Hà Nội"
+  "34": "Hải Dương"
+  "35": "Ninh Bình"
+  "36": "Thanh Hóa"
+  "37": "Nghệ An"
+  "38": "Hà Tĩnh"
+  "39": "Đồng Nai"
+  "40": "Hà Nội"
+  "43": "Đà Nẵng"
+  "47": "Đắk Lắk"
+  "48": "Đắk Nông"
+  "49": "Lâm Đồng"
+  "50": "TP. Hồ Chí Minh"
+  "51": "TP. Hồ Chí Minh"
+  "52": "TP. Hồ Chí Minh"
+  "53": "TP. Hồ Chí Minh"
+  "54": "TP. Hồ Chí Minh"
+  "55": "TP. Hồ Chí Minh"
+  "56": "TP. Hồ Chí Minh"
+  "57": "TP. Hồ Chí Minh"
+  "58": "TP. Hồ Chí Minh"
+  "59": "TP. Hồ Chí Minh"
+  "60": "Đồng Nai"
+  "61": "Bình Dương"
+  "62": "Long An"
+  "63": "Tiền Giang"
+  "64": "Vĩnh Long"
+  "65": "Cần Thơ"
+  "66": "Đồng Tháp"
+  "67": "An Giang"
+  "68": "Kiên Giang"
+  "69": "Cà Mau"
+  "70": "Tây Ninh"
+  "71": "Bến Tre"
+  "72": "Bà Rịa - Vũng Tàu"
+  "73": "Quảng Bình"
+  "74": "Quảng Trị"
+  "75": "Thừa Thiên Huế"
+  "76": "Quảng Ngãi"
+  "77": "Bình Định"
+  "78": "Phú Yên"
+  "79": "Khánh Hòa"
+  "80": "Cục Cảnh sát giao thông (Cấp Trung ương)"
+  "81": "Gia Lai"
+  "82": "Kon Tum"
+  "83": "Sóc Trăng"
+  "84": "Trà Vinh"
+  "85": "Ninh Thuận"
+  "86": "Bình Thuận"
+  "88": "Vĩnh Phúc"
+  "89": "Hưng Yên"
+  "90": "Hà Nam"
+  "92": "Quảng Nam"
+  "93": "Bình Phước"
+  "94": "Bạc Liêu"
+  "95": "Hậu Giang"
+  "97": "Bắc Kạn"
+  "98": "Bắc Giang"
+  "99": "Bắc Ninh"
+
+# ------------------------------------------------------------------------------
+# 2. DANH MỤC KÝ HIỆU BIỂN SỐ XE QUÂN SỰ (MILITARY CODES)
+# ------------------------------------------------------------------------------
+military_unit_codes:
+  # Cơ quan Bộ Quốc phòng & Tổng cục
+  "TM": "Bộ Tổng Tham mưu - Cơ quan Bộ Quốc phòng"
+  "TC": "Tổng cục Chính trị"
+  "TH": "Tổng cục Hậu cần"
+  "TT": "Tổng cục Kỹ thuật"
+  "TK": "Tổng cục Công nghiệp quốc phòng"
+  "TN": "Tổng cục II (Tổng cục Tình báo)"
+  
+  # Quân khu, Quân chủng, Bộ Tư lệnh
+  "KA": "Quân khu 1"
+  "KB": "Quân khu 2"
+  "KC": "Quân khu 3"
+  "KD": "Quân khu 4"
+  "KV": "Quân khu 5"
+  "KP": "Quân khu 7"
+  "KK": "Quân khu 9"
+  "KT": "Bộ Tư lệnh Thủ đô Hà Nội"
+  "QA": "Quân chủng Phòng không - Không quân"
+  "QH": "Quân chủng Hải quân"
+  "QB": "Bộ Tư lệnh Bộ đội Biên phòng"
+  "QC": "Bộ Tư lệnh Cảnh sát biển"
+  "QM": "Bộ Tư lệnh Tác chiến không gian mạng (BTL 86)"
+  "BL": "Bộ Tư lệnh Bảo vệ Lăng Chủ tịch Hồ Chí Minh"
+  
+  # Binh chủng
+  "BB": "Binh chủng Tăng - Thiết giáp"
+  "BC": "Binh chủng Công binh"
+  "BK": "Binh chủng Đặc công"
+  "BP": "Binh chủng Pháo binh"
+  "BH": "Binh chủng Hóa học"
+  "BT": "Binh chủng Thông tin liên lạc"
+  
+  # Quân đoàn & Học viện / Trường Sĩ quan
+  "AA": "Quân đoàn 12 (trước là Quân đoàn 1)"
+  "AB": "Quân đoàn 2 (trước đây)"
+  "AC": "Quân đoàn 3 (trước đây)"
+  "AD": "Quân đoàn 4 (trước đây)"
+  "HA": "Học viện Quốc phòng"
+  "HB": "Học viện Lục quân"
+  "HC": "Học viện Chính trị"
+  "HE": "Học viện Hậu cần"
+  "HD": "Học viện Kỹ thuật quân sự"
+  "HH": "Học viện Quân y"
+  "HT": "Trường Sĩ quan Lục quân 1"
+  
+  # Viện nghiên cứu, Bệnh viện, Doanh nghiệp Quân đội
+  "PQ": "Viện Khoa học và Công nghệ quân sự"
+  "PM": "Viện Thiết kế Bộ Quốc phòng"
+  "PX": "Trung tâm Nhiệt đới Việt - Nga"
+  "PP": "Bệnh viện Quân y trực thuộc BQP (108, 175, Y học cổ truyền)"
+  "AV": "Binh đoàn 11"
+  "AT": "Binh đoàn 12"
+  "AN": "Binh đoàn 15"
+  "AX": "Binh đoàn 16"
+  "AM": "Binh đoàn 18"
+  "VT": "Tập đoàn Công nghiệp - Viễn thông Quân đội (Viettel)"
+  "CA": "Tổng công ty 36"
+  "CB": "Ngân hàng TMCP Quân đội (MB)"
+  "CD": "Tổng công ty Vạn Xuân"
+  "CH": "Tổng công ty Đông Bắc"
+  "CM": "Tổng công ty Thái Sơn"
+  "CN": "Tổng công ty Đầu tư phát triển Nhà và Đô thị BQP"
+  "CP": "Tổng công ty 319"
+  "CT": "Công ty TNHH MTV Ứng dụng Kỹ thuật và Sản xuất (Tecapro)"
+  "CV": "Tổng công ty Xây dựng Lũng Lô"
+
+# ------------------------------------------------------------------------------
+# 3. DANH MỤC SÊ-RI NGOẠI GIAO & TỔ CHỨC QUỐC TẾ (DIPLOMATIC & INT CODES)
+# ------------------------------------------------------------------------------
+diplomatic_series:
+  "NG": "Đại sứ quán, Cơ quan lãnh sự, Viên chức ngoại giao"
+  "QT": "Cơ quan đại diện Tổ chức Quốc tế và Viên chức quốc tế"
+  "NN": "Tổ chức, văn phòng đại diện, cá nhân người nước ngoài"
+  "CV": "Nhân viên hành chính kỹ thuật của cơ quan ngoại giao"
+
+# ------------------------------------------------------------------------------
+# 4. DANH MỤC SÊ-RI CHUYÊN DỤNG VÀ ĐẶC BIỆT DÂN SỰ
+# ------------------------------------------------------------------------------
+special_civilian_series:
+  "LD": "Xe của các doanh nghiệp có vốn đầu tư nước ngoài (Liên doanh)"
+  "DA": "Xe của các Ban quản lý dự án do nước ngoài đầu tư"
+  "R":  "Rơ-moóc / Sơ-mi rơ-moóc"
+  "RM": "Rơ-moóc / Sơ-mi rơ-moóc (ký hiệu mở rộng)"
+  "MK": "Máy kéo, xe máy chuyên dùng"
+  "MĐ": "Xe máy điện (viết không dấu là MD)"
+  "MD": "Xe máy điện (chuẩn hóa ASCII)"
+  "CD": "Xe 4 bánh chở người gắn động cơ / Xe điện du lịch"
+  "HC": "Xe hoạt động trong phạm vi hạn chế (sân bay, cảng biển)"
+  "T":  "Xe đăng ký tạm thời"
+
+# ------------------------------------------------------------------------------
+# 5. KHÔNG GIAN TRẠNG THÁI HỮU HẠN & BIỂU THỨC QUY TẮC (REGULAR GRAMMAR)
+# ------------------------------------------------------------------------------
+grammar_rules:
+  # Ký hiệu cơ bản:
+  # P  : Mã tỉnh (2 chữ số hợp lệ từ valid_province_codes)
+  # C  : Chữ cái dân sự tiêu chuẩn (A,B,C,D,E,F,G,H,K,L,M,N,P,S,T,U,V,X,Y,Z)
+  # M  : Mã đơn vị quân sự (2 chữ cái từ military_unit_codes)
+  # D  : Sê-ri ngoại giao (NG, QT, NN, CV)
+  # N  : Chữ số tự nhiên (0-9)
+  # S  : Dấu phân cách hiển thị tùy chọn: '-', '.', ' ' hoặc ''
+
+  patterns:
+    # 5.1 BIỂN Ô TÔ DÂN SỰ & CƠ QUAN NHÀ NƯỚC (5 SỐ & 4 SỐ)
+    civilian_car_5_digits:
+      description: "Ô tô 5 số (TT 24/2023 & TT 58/2020) - 1 chữ cái hoặc 2 chữ cái"
+      single_line_regex: "^(?P<province>[1-9][0-9])(?P<series>[A-Z]{1,2})(?P<sub_series>[0-9]?)[- ]?(?P<num>[0-9]{3})[.]?(?P<tail>[0-9]{2})$"
+      double_line_regex:
+        line1: "^(?P<province>[1-9][0-9])[- ]?(?P<series>[A-Z]{1,2})(?P<sub_series>[0-9]?)$"
+        line2: "^(?P<num>[0-9]{3})[.]?(?P<tail>[0-9]{2})$"
+      normalized_pattern: "PP C{1,2} [0-9]{5}"
+      example: "30A12345, 51K99999, 29AA12345"
+
+    civilian_car_4_digits:
+      description: "Ô tô 4 số cũ đang lưu hành"
+      single_line_regex: "^(?P<province>[1-9][0-9])(?P<series>[A-Z]{1,2})[- ]?(?P<num>[0-9]{4})$"
+      double_line_regex:
+        line1: "^(?P<province>[1-9][0-9])[- ]?(?P<series>[A-Z]{1,2})$"
+        line2: "^(?P<num>[0-9]{4})$"
+      normalized_pattern: "PP C{1,2} [0-9]{4}"
+      example: "29S1234, 30H5678"
+
+    # 5.2 BIỂN XE CHUYÊN DỤNG (RƠ-MOÓC, MÁY KÉO, LIÊN DOANH, DỰ ÁN)
+    special_vehicle_car:
+      description: "Xe rơ-moóc, liên doanh, dự án, máy kéo"
+      single_line_regex: "^(?P<province>[1-9][0-9])(?P<series>LD|DA|MK|RM|R|CD|HC)[- ]?(?P<num>[0-9]{3,5})$"
+      double_line_regex:
+        line1: "^(?P<province>[1-9][0-9])[- ]?(?P<series>LD|DA|MK|RM|R|CD|HC)$"
+        line2: "^(?P<num>[0-9]{3,5})$"
+      normalized_pattern: "PP (LD|DA|MK|RM|R|CD|HC) [0-9]{4,5}"
+      example: "29LD12345, 51R12345, 34MK1234"
+
+    # 5.3 BIỂN XE MÁY / MÔ TÔ (2 DÒNG HOẶC 1 DÒNG CHUẨN HÓA)
+    motorcycle_5_digits:
+      description: "Xe máy 5 số: Sê-ri 2 chữ cái (TT 24) hoặc 1 chữ cái + 1 số (TT 58)"
+      single_line_regex: "^(?P<province>[1-9][0-9])(?P<series>[A-Z]{1,2})(?P<sub_id>[0-9]?)[- ]?(?P<num>[0-9]{3})[.]?(?P<tail>[0-9]{2})$"
+      double_line_regex:
+        line1: "^(?P<province>[1-9][0-9])[- ]?(?P<series>[A-Z]{1,2})(?P<sub_id>[0-9]?)$"
+        line2: "^(?P<num>[0-9]{3})[.]?(?P<tail>[0-9]{2})$"
+      normalized_pattern: "PP (C[0-9]|CC|MD[0-9]) [0-9]{5}"
+      example: "29B112345, 59AA67890, 29MD12345"
+
+    motorcycle_4_digits:
+      description: "Xe máy 4 số cũ"
+      single_line_regex: "^(?P<province>[1-9][0-9])(?P<series>[A-Z]{1,2})(?P<sub_id>[0-9]?)[- ]?(?P<num>[0-9]{4})$"
+      double_line_regex:
+        line1: "^(?P<province>[1-9][0-9])[- ]?(?P<series>[A-Z]{1,2})(?P<sub_id>[0-9]?)$"
+        line2: "^(?P<num>[0-9]{4})$"
+      normalized_pattern: "PP (C[0-9]|CC) [0-9]{4}"
+      example: "29H41234, 52F25678"
+
+    # 5.4 BIỂN SỐ XE QUÂN SỰ
+    military_vehicle:
+      description: "Xe quân đội biển đỏ: 2 chữ cái đơn vị + 4 hoặc 5 chữ số"
+      single_line_regex: "^(?P<unit>[A-Z]{2})[- ]?(?P<num1>[0-9]{2})[- ]?(?P<num2>[0-9]{2,3})$"
+      double_line_regex:
+        line1: "^(?P<unit>[A-Z]{2})$"
+        line2: "^(?P<num>[0-9]{4,5})$"
+      normalized_pattern: "MM [0-9]{4,5}"
+      example: "TM1234, QA5678, VT12345"
+
+    # 5.5 BIỂN SỐ NGOẠI GIAO & TỔ CHỨC QUỐC TẾ
+    diplomatic_vehicle:
+      description: "Biển NG, QT, NN, CV: Mã tỉnh + Sê-ri + Mã quốc gia/tổ chức (3 số) + Số thứ tự (2 số)"
+      single_line_regex: "^(?P<province>[1-9][0-9])(?P<series>NG|QT|NN|CV)[- ]?(?P<country>[0-9]{3})[- ]?(?P<order>[0-9]{2})$"
+      double_line_regex:
+        line1: "^(?P<province>[1-9][0-9])[- ]?(?P<series>NG|QT|NN|CV)$"
+        line2: "^(?P<country>[0-9]{3})[- ]?(?P<order>[0-9]{2})$"
+      normalized_pattern: "PP (NG|QT|NN|CV) [0-9]{3} [0-9]{2}"
+      example: "80NG16601, 29QT00102, 51NN12345"
+
+# ------------------------------------------------------------------------------
+# 6. MÁY TRẠNG THÁI HỮU HẠN (DFA TRANSITION GRAPH)
+# ------------------------------------------------------------------------------
+# Định nghĩa các trạng thái (States) và chuyển dịch (Transitions) cho chuỗi OCR chuẩn hóa
+dfa_state_machine:
+  start_state: "S_START"
+  accept_states:
+    - "S_ACCEPT_5D"
+    - "S_ACCEPT_4D"
+    - "S_ACCEPT_DIPLO"
+    - "S_ACCEPT_MILITARY"
+
+  states:
+    S_START:
+      description: "Điểm khởi đầu nhận dạng chuỗi"
+      transitions:
+        - input_category: "PROVINCE_FIRST_DIGIT (1-9)"
+          next_state: "S_PROV_D1"
+          note: "Nhánh biển dân sự, cơ quan hoặc ngoại giao"
+        - input_category: "MILITARY_FIRST_LETTER (A,B,C,H,K,P,Q,T,V)"
+          next_state: "S_MIL_L1"
+          note: "Nhánh biển quân sự"
+
+    S_PROV_D1:
+      description: "Chữ số đầu tiên của mã tỉnh"
+      transitions:
+        - input_category: "PROVINCE_SECOND_DIGIT (0-9)"
+          next_state: "S_PROV_D2"
+          constraint: "Ghép lại phải thuộc bảng valid_province_codes"
+
+    S_PROV_D2:
+      description: "Đã xác định mã tỉnh hợp lệ"
+      transitions:
+        - input_category: "CIVILIAN_SERIES_LETTER (A-Z trừ I,J,O,W,Q)"
+          next_state: "S_CIV_SERIES_1"
+        - input_category: "SPECIAL_SERIES_LETTER ('R')"
+          next_state: "S_SPEC_R"
+        - input_category: "DIPLOMATIC_SERIES_N ('N')"
+          next_state: "S_DIPLO_N"
+        - input_category: "DIPLOMATIC_SERIES_Q ('Q')"
+          next_state: "S_DIPLO_Q"
+        - input_category: "DIPLOMATIC_SERIES_C ('C')"
+          next_state: "S_DIPLO_C"
+
+    # Nhánh ô tô & xe máy dân sự:
+    S_CIV_SERIES_1:
+      description: "Chữ cái đầu tiên của sê-ri dân sự"
+      transitions:
+        - input_category: "SECOND_SERIES_LETTER (A-Z dân sự)"
+          next_state: "S_CIV_SERIES_2"
+        - input_category: "SUB_SERIES_DIGIT (0-9: xe máy/tải)"
+          next_state: "S_CIV_SERIES_NUM"
+        - input_category: "NUMBER_FIRST_DIGIT (0-9)"
+          next_state: "S_NUM_1"
+
+    S_CIV_SERIES_2:
+      description: "Sê-ri 2 chữ cái (ô tô TT24 hoặc xe máy)"
+      transitions:
+        - input_category: "NUMBER_FIRST_DIGIT (0-9)"
+          next_state: "S_NUM_1"
+
+    S_CIV_SERIES_NUM:
+      description: "Sê-ri 1 chữ cái + 1 số (ví dụ 29-B1)"
+      transitions:
+        - input_category: "NUMBER_FIRST_DIGIT (0-9)"
+          next_state: "S_NUM_1"
+
+    S_SPEC_R:
+      description: "Biển rơ-moóc chữ R hoặc RM"
+      transitions:
+        - input_category: "CHAR 'M'"
+          next_state: "S_SPEC_RM"
+        - input_category: "NUMBER_FIRST_DIGIT (0-9)"
+          next_state: "S_NUM_1"
+
+    S_SPEC_RM:
+      transitions:
+        - input_category: "NUMBER_FIRST_DIGIT (0-9)"
+          next_state: "S_NUM_1"
+
+    # Nhánh số thứ tự (0-9):
+    S_NUM_1:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_NUM_2" }]
+    S_NUM_2:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_NUM_3" }]
+    S_NUM_3:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_NUM_4" }]
+    S_NUM_4:
+      transitions:
+        - input_category: "DIGIT (0-9)"
+          next_state: "S_NUM_5"
+        - input_category: "END_OF_STRING / PAD"
+          next_state: "S_ACCEPT_4D"
+    S_NUM_5:
+      transitions:
+        - input_category: "END_OF_STRING / PAD"
+          next_state: "S_ACCEPT_5D"
+
+    # Nhánh Ngoại giao (NG, QT, NN, CV):
+    S_DIPLO_N:
+      transitions:
+        - input_category: "CHAR 'G'"
+          next_state: "S_DIPLO_CODE"
+        - input_category: "CHAR 'N'"
+          next_state: "S_DIPLO_CODE"
+    S_DIPLO_Q:
+      transitions:
+        - input_category: "CHAR 'T'"
+          next_state: "S_DIPLO_CODE"
+    S_DIPLO_C:
+      transitions:
+        - input_category: "CHAR 'V'"
+          next_state: "S_DIPLO_CODE"
+        - input_category: "CHAR 'D'"
+          next_state: "S_CIV_SERIES_2"
+    S_DIPLO_CODE:
+      description: "Bắt đầu 3 số mã quốc gia"
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_DIP_C1" }]
+    S_DIP_C1:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_DIP_C2" }]
+    S_DIP_C2:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_DIP_C3" }]
+    S_DIP_C3:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_DIP_O1" }]
+    S_DIP_O1:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_DIP_O2" }]
+    S_DIP_O2:
+      transitions:
+        - input_category: "END_OF_STRING / PAD"
+          next_state: "S_ACCEPT_DIPLO"
+
+    # Nhánh Quân đội:
+    S_MIL_L1:
+      description: "Chữ cái đầu tiên đơn vị quân sự"
+      transitions:
+        - input_category: "MILITARY_SECOND_LETTER"
+          next_state: "S_MIL_L2"
+          constraint: "Cặp chữ cái phải thuộc bảng military_unit_codes"
+    S_MIL_L2:
+      transitions:
+        - input_category: "DIGIT (0-9)"
+          next_state: "S_MIL_N1"
+    S_MIL_N1:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_MIL_N2" }]
+    S_MIL_N2:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_MIL_N3" }]
+    S_MIL_N3:
+      transitions: [{ input_category: "DIGIT (0-9)", next_state: "S_MIL_N4" }]
+    S_MIL_N4:
+      transitions:
+        - input_category: "DIGIT (0-9)"
+          next_state: "S_MIL_N5"
+        - input_category: "END_OF_STRING / PAD"
+          next_state: "S_ACCEPT_MILITARY"
+    S_MIL_N5:
+      transitions:
+        - input_category: "END_OF_STRING / PAD"
+          next_state: "S_ACCEPT_MILITARY"

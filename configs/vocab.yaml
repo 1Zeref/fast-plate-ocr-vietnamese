@@ -1,0 +1,57 @@
+# ==============================================================================
+# FAST-PLATE-OCR-VIETNAMESE: VOCABULARY & ALPHABET CONFIGURATION
+# Quy chuẩn ký tự biển số xe Việt Nam (Thông tư 24/2023/TT-BCA & TT 169/2021/TT-BQP)
+# ==============================================================================
+
+# Ký tự padding chuẩn hoá độ dài biển số (phù hợp mô hình CCT / CNN nhiều đầu ra)
+pad_char: "_"
+
+# Số slot tối đa của biển số xe Việt Nam:
+# Biển dài nhất: Xe ngoại giao chuẩn hóa (ví dụ: 80-NG-166-01 -> 9 ký tự ký hiệu)
+# Dự phòng slot cho phân cách dòng hoặc biến thể: 10 slots
+max_plate_slots: 10
+
+# Bảng ký tự đầy đủ dùng làm nhãn phân lớp (Alphabet String)
+# Gồm: 10 chữ số (0-9) + 22 chữ cái hợp lệ + 1 ký tự pad ('_') = 33 tokens
+alphabet: "0123456789ABCDEFGHKLMNPQRSTUVXYZ_"
+
+# Chi tiết phân loại tập ký tự:
+character_sets:
+  # 10 chữ số tự nhiên sử dụng trong mọi loại biển số
+  digits: "0123456789"
+  
+  # 22 chữ cái Latinh được phép lưu hành trong hệ thống biển số Việt Nam:
+  # Gồm 20 chữ cái dân sự tiêu chuẩn + 2 chữ cái đặc thù ('Q' trong quân sự/ngoại giao, 'R' trong rơ-moóc)
+  letters: "ABCDEFGHKLMNPQRSTUVXYZ"
+  
+  # 20 chữ cái tiêu chuẩn cho xe cơ giới dân sự (Điều 37 Thông tư 24/2023/TT-BCA)
+  civilian_letters: "ABCDEFGHKLMNPSTUVXYZ"
+  
+  # Chữ cái chuyên dụng bổ sung:
+  special_letters:
+    military_and_international: "Q"  # Có trong biển Quân đội (QA, QB, QC, QH, QK, QM, PQ) và Ngoại giao (QT)
+    trailer_series: "R"              # Có trong biển xe Rơ-moóc, Sơ-mi rơ-moóc (R, RM)
+
+  # CÁC KÝ TỰ BỊ LOẠI TRỪ (EXCLUDED CHARACTERS) & LÝ DO PHÁP LÝ / KỸ THUẬT:
+  excluded_letters:
+    - char: "I"
+      reason: "Tránh nhầm lẫn tuyệt đối với số '1' theo quy định BCA/BQP; không nằm trong bảng chữ cái sê-ri."
+    - char: "O"
+      reason: "Tránh nhầm lẫn tuyệt đối với chữ số '0' theo quy chuẩn dập khuôn biển số; không nằm trong sê-ri."
+    - char: "J"
+      reason: "Không thuộc danh mục 20 chữ cái cấp sê-ri xe dân sự và không dùng trong ký hiệu viết tắt quân sự/ngoại giao."
+    - char: "W"
+      reason: "Không nằm trong bảng chữ cái tiếng Việt pháp lý; không cấp cho bất kỳ loại phương tiện giao thông nào."
+
+# Thiết lập kích thước đầu vào mặc định cho mô hình OCR (chuẩn hóa tỷ lệ biển dài/vuông)
+image_specs:
+  plate_long:
+    height: 64
+    width: 256
+    channels: 3
+    aspect_ratio: "4:1"
+  plate_square:
+    height: 128
+    width: 160
+    channels: 3
+    aspect_ratio: "5:4"
