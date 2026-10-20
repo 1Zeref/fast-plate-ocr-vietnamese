@@ -213,7 +213,26 @@ ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhậ
 
 ---
 
-## 9. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+## 9. Hợp Nhất Quyết Định Đa Khung Hình (Temporal Consensus Engine) - Bước 5.2
+
+- **Mục tiêu:** Đưa ra kết quả nhận diện chính xác duy nhất cho mỗi phương tiện lướt qua camera, triệt tiêu mọi sai số ngẫu nhiên do chớp đèn pha hay bóng lóa tức thời.
+- **Trọng Số Chất Lượng Chuẩn Hóa:**
+  - Mỗi frame $i$ trong tập $K$ frame của Tracklet ID được tính trọng số:
+    $$w_i = \frac{Q_i^{1.5} \cdot C_{ocr, i}}{\sum_j Q_j^{1.5} \cdot C_{ocr, j}}$$
+    với $Q_i$ là điểm chất lượng quang học và $C_{ocr, i}$ là độ tin cậy nhận diện.
+- **Hợp Nhất Ma Trận Xác Suất Mềm (Soft Probability Fusion):**
+  - Kết hợp phân phối xác suất dự đoán của $K$ frame:
+    $$P_{fused} = \sum_{i=1}^K w_i \cdot P_i$$
+  - Ma trận $P_{fused}$ được đưa vào `GrammarGuidedBeamSearchDecoder` để giải mã ràng buộc cú pháp DFA, đảm bảo chuỗi xuất ra 100% hợp lệ pháp luật.
+- **Bỏ Phiếu Có Trọng Số Theo Từng Slot (Weighted Majority Voting):**
+  - Tích lũy phiếu bầu có trọng số cho từng token tại mỗi vị trí ký tự, tự động nắn chỉnh nếu có frame bị lóa sáng cục bộ.
+- **Cơ Chế Triệt Tiêu Ngoại Lai (Glare & Flash Suppression):**
+  - Tự động phát hiện và ghi nhận các frame bị sai lệch ký tự do hiện tượng chớp đèn hoặc rung nhòe tức thời vào `outliers_suppressed`.
+  - Tính toán chỉ số mức độ đồng thuận (`agreement_rate`), đảm bảo độ tin cậy tuyệt đối trước khi kết luận.
+
+---
+
+## 10. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -248,7 +267,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 10. Nguồn Phông Chữ & Typography Chuẩn
+## 11. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -262,7 +281,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 11. Cấu Trúc Dự Án (Repository Structure)
+## 12. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
@@ -277,6 +296,7 @@ fast-plate-ocr-vietnamese/
 │   │   ├── byte_tracker.py           # Thuật toán ByteTrack liên kết 2 pha D_high và D_low
 │   │   ├── quality.py                # Bộ lọc chất lượng quang học Laplacian & góc nghiêng
 │   │   ├── buffer.py                 # Hàng đợi Best-K frames buffer
+│   │   ├── consensus.py              # Động cơ hợp nhất đa khung hình Temporal Consensus
 │   │   └── __init__.py
 │   ├── decoder/                      # Module giải mã ràng buộc ngữ pháp (Giai đoạn 4)
 │   │   ├── masking.py                # Sinh mặt nạ xác suất DFA & khử xung đột quang học

@@ -26,6 +26,7 @@ from src.decoder.beam_search import GrammarGuidedBeamSearchDecoder
 from src.tracking.byte_tracker import ByteTracker
 from src.tracking.quality import FrameQualityAssessor
 from src.tracking.buffer import BestKFrameBuffer
+from src.tracking.consensus import TemporalConsensusEngine
 
 
 class VietnamesePlateOCRPipeline:
@@ -73,6 +74,7 @@ class VietnamesePlateOCRPipeline:
         self.tracker = ByteTracker(track_thresh=conf_threshold, low_score_thresh=0.10)
         self.quality_assessor = FrameQualityAssessor(sharpness_threshold=85.0)
         self.frame_buffer = BestKFrameBuffer(k=5, min_quality_threshold=0.35)
+        self.consensus_engine = TemporalConsensusEngine(config_path=config_path)
         self.frame_count = 0
 
     def _normalize_tensor(self, strip_bgr: np.ndarray) -> torch.Tensor:
@@ -294,28 +296,40 @@ class VietnamesePlateOCRPipeline:
             is_ready = self.frame_buffer.is_ready_for_recognition(track_id, min_frames=2, min_avg_quality=0.35)
             best_buffered = self.frame_buffer.get_best_frames(track_id)
 
+            # 6. Nếu đã tích lũy đủ khung hình, thực hiện hợp nhất đa khung hình (Temporal Consensus)
             plate_text = ""
             ocr_conf = 0.0
             is_valid = False
             plate_type = "UNKNOWN"
+            agreement_rate = 0.0
+            outliers = []
 
-            # 6. Nếu đã sẵn sàng, thực hiện nhận diện trên frame tốt nhất trong buffer
-            if is_ready and len(best_buffered) > 0:
-                best_strip = best_buffered[0]["virtual_strip"]
-                if best_strip is not None:
-                    input_tensor = self._normalize_tensor(best_strip)
+            # Trích xuất logits và dự đoán cho các frame trong buffer nếu chưa có
+            for b_frame in best_buffered:
+                if "logits" not in b_frame and b_frame.get("virtual_strip") is not None:
+                    strip_tensor = self._normalize_tensor(b_frame["virtual_strip"])
                     with torch.no_grad():
-                        logits = self.ocr_model(input_tensor)
+                        l = self.ocr_model(strip_tensor)
+                    b_frame["logits"] = l[0].cpu().numpy()
+                    dec = self.decoder.decode_single(l[0], beam_width=beam_width, apply_grammar=use_grammar)
+                    b_frame["text"] = dec["text"]
+                    b_frame["confidence"] = dec["confidence"]
 
-                    decoded = self.decoder.decode_single(
-                        logits[0],
-                        beam_width=beam_width,
-                        apply_grammar=use_grammar,
-                    )
-                    plate_text = decoded["text"]
-                    ocr_conf = decoded["confidence"]
-                    is_valid = decoded["is_valid"]
-                    plate_type = decoded.get("dfa_meta", {}).get("plate_type", "UNKNOWN")
+            if is_ready and len(best_buffered) >= 2:
+                consensus_res = self.consensus_engine.consolidate_tracklet(
+                    track_id=track_id,
+                    frames_data=best_buffered,
+                    beam_width=beam_width,
+                )
+                plate_text = consensus_res["plate_text"]
+                ocr_conf = consensus_res["consensus_confidence"]
+                is_valid = consensus_res["is_valid"]
+                plate_type = consensus_res.get("dfa_meta", {}).get("plate_type", "UNKNOWN")
+                agreement_rate = consensus_res["agreement_rate"]
+                outliers = consensus_res.get("outliers_suppressed", [])
+            elif len(best_buffered) > 0 and "text" in best_buffered[0]:
+                plate_text = best_buffered[0]["text"]
+                ocr_conf = best_buffered[0].get("confidence", 0.0)
 
             track_summary = self.frame_buffer.get_track_summary(track_id)
 
@@ -331,7 +345,39 @@ class VietnamesePlateOCRPipeline:
                 "ocr_confidence": ocr_conf,
                 "is_valid_grammar": is_valid,
                 "plate_type": plate_type,
+                "agreement_rate": agreement_rate,
+                "outliers_suppressed": outliers,
                 "track_summary": track_summary,
             })
 
         return frame_results
+
+    def consolidate_vehicle(self, track_id: int, beam_width: int = 5) -> Dict[str, Any]:
+        """
+        Đưa ra quyết định nhận diện chính xác duy nhất cho phương tiện (khi xe hoàn thành hành trình qua camera).
+        Tự động giải phóng bộ nhớ tracklet sau khi xuất kết quả.
+        """
+        best_buffered = self.frame_buffer.get_best_frames(track_id)
+        if not best_buffered:
+            return {"track_id": track_id, "plate_text": "", "is_valid": False, "consensus_confidence": 0.0}
+
+        # Đảm bảo tất cả frame đã có logits
+        for b_frame in best_buffered:
+            if "logits" not in b_frame and b_frame.get("virtual_strip") is not None:
+                strip_tensor = self._normalize_tensor(b_frame["virtual_strip"])
+                with torch.no_grad():
+                    l = self.ocr_model(strip_tensor)
+                b_frame["logits"] = l[0].cpu().numpy()
+                dec = self.decoder.decode_single(l[0], beam_width=beam_width, apply_grammar=True)
+                b_frame["text"] = dec["text"]
+                b_frame["confidence"] = dec["confidence"]
+
+        final_decision = self.consensus_engine.consolidate_tracklet(
+            track_id=track_id,
+            frames_data=best_buffered,
+            beam_width=beam_width,
+        )
+
+        # Giải phóng track khỏi buffer
+        self.frame_buffer.remove_track(track_id)
+        return final_decision
