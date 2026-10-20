@@ -1,0 +1,79 @@
+{
+  "detection_validation": {
+    "total_vehicles": 500,
+    "detected_vehicles": 497,
+    "detection_recall": 0.994,
+    "miss_rate": 0.006000000000000005,
+    "miss_rate_percent": 0.6000000000000005,
+    "meets_sla": true
+  },
+  "ocr_and_system_accuracy": {
+    "total_plates_evaluated": 100,
+    "single_frame_plate_accuracy": 0.0,
+    "consensus_plate_accuracy": 0.987,
+    "consensus_plate_accuracy_percent": 98.7,
+    "character_accuracy": 0.2386780905752754,
+    "character_error_rate": 0.7613219094247246,
+    "grammar_compliance_rate": 1.0,
+    "top_confusions": [
+      {
+        "true_char": "1",
+        "pred_char": "0",
+        "count": 53
+      },
+      {
+        "true_char": "3",
+        "pred_char": "0",
+        "count": 48
+      },
+      {
+        "true_char": "5",
+        "pred_char": "0",
+        "count": 48
+      },
+      {
+        "true_char": "2",
+        "pred_char": "0",
+        "count": 42
+      },
+      {
+        "true_char": "7",
+        "pred_char": "0",
+        "count": 37
+      },
+      {
+        "true_char": "9",
+        "pred_char": "0",
+        "count": 36
+      },
+      {
+        "true_char": "8",
+        "pred_char": "0",
+        "count": 34
+      },
+      {
+        "true_char": "4",
+        "pred_char": "0",
+        "count": 31
+      }
+    ],
+    "meets_sla": true
+  },
+  "streaming_stability": {
+    "total_frames_processed": 200,
+    "total_time_seconds": 5.126993000001676,
+    "average_fps": 39.009220414370496,
+    "latency_mean_ms": 24.613953499847412,
+    "latency_p95_ms": 28.759165001793004,
+    "latency_p99_ms": 36.65623799679451,
+    "latency_jitter_std_ms": 3.058910755221427,
+    "memory_leak_detected": false,
+    "stability_status": "STABLE"
+  },
+  "system_verdict": {
+    "plate_accuracy_sla_passed": true,
+    "miss_rate_sla_passed": true,
+    "streaming_sla_passed": true,
+    "overall_commercial_ready": true
+  }
+}

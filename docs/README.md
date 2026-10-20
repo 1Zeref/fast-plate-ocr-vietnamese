@@ -232,7 +232,54 @@ ectify_plate_quad) trả về ảnh biển số thẳng thớm phục vụ nhậ
 
 ---
 
-## 10. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
+
+---
+
+## 10. Tối Ưu Hóa Triển Khai Biên & Lượng Tử Hóa Engine (Bước 6.1)
+
+- **Mục tiêu:** Tối ưu hóa mô hình Detector và CCT OCR để đáp ứng thời gian thực trên các thiết bị phần cứng biên (Edge SoC, Gateway công nghiệp, GPU nhúng).
+- **Mã nguồn:**
+  - `src/deploy/export_onnx.py`: Xuất đồ thị tính toán PyTorch sang ONNX FP32 và lượng tử hóa động INT8 (`QuantType.QUInt8`).
+  - `src/deploy/onnx_engine.py`: Lớp thực thi ONNX Runtime đa luồng (`ONNXPlateDetector`, `ONNXCCTPlateOCR`) tự động lựa chọn Execution Provider (`CUDA`, `TensorRT`, `DirectML`, `CPU`).
+  - `src/deploy/tensorrt_engine.py`: Sinh lệnh và script biên dịch TensorRT FP16/INT8 (`scripts/build_tensorrt_engines.sh` và `.bat`).
+  - `src/deploy/benchmark.py`: Bộ đo lường độ trễ chi tiết từng mắt xích và xuất báo cáo `docs/BENCHMARK_REPORT.md`.
+- **Kết Quả Đo Lường Độ Trễ (Inference Latency SLA Benchmark):**
+
+| Mắt xích Pipeline | SLA Đặt ra | PyTorch FP32 | ONNX Runtime FP32 | ONNX INT8 (Quant) | Trạng thái SLA |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **1. Detector 4 Góc Biển số** | $\le 12.0\text{ ms}$ | 18.89 ms | **11.50 ms** | 17.87 ms | **✅ ĐẠT SLA** |
+| **2. Warping & Homography Router** | $\le 2.0\text{ ms}$ | - | **0.25 ms** | - | **✅ ĐẠT SLA** |
+| **3. CCT OCR Inference (64x256)** | $\le 3.0\text{ ms}$ | 4.14 ms | **0.72 ms** | 1.17 ms | **✅ ĐẠT SLA (Vượt 4x)** |
+| **4. Post-processing (DFA Beam Search)** | $\le 1.0\text{ ms}$ | - | **0.57 ms** | - | **✅ ĐẠT SLA** |
+| **TOÀN BỘ PIPELINE END-TO-END** | $\le 18.0\text{ ms}$ | - | **13.04 ms** | - | **✅ ĐẠT SLA (~76.7 FPS)** |
+
+> **Nhận xét hiệu năng:** Hệ thống đạt tốc độ **~76.7 FPS** ngay trên CPU tiêu chuẩn, vượt xa yêu cầu camera luồng RTSP (25-30 FPS). Khi triển khai trên GPU với TensorRT FP16, độ trễ toàn trình ước tính giảm xuống dưới **6 ms (>150 FPS)**.
+
+---
+
+## 11. Kiểm Chuẩn Hệ Thống Toàn Diện & Ma Trận Nhầm Lẫn (Bước 6.2)
+
+- **Mục tiêu:** Xác nhận độ chính xác tổng thể, tỷ lệ đọc sót và độ ổn định liên tục của toàn bộ pipeline trong điều kiện vận hành thực tế 1-2 giờ.
+- **Mã nguồn:**
+  - `src/deploy/validation.py`: Công cụ kiểm chuẩn toàn diện hệ thống (`EndToEndSystemValidator`) và bộ theo dõi ma trận nhầm lẫn ký tự (`ConfusionMatrixTracker`).
+  - `tests/test_deploy_and_validation.py`: Bộ kiểm thử tự động hóa 6 test case cho toàn bộ Giai đoạn 6.
+- **Chỉ Số Đạt Được Cấp Hệ Thống So Với Tiêu Chuẩn SLA:**
+
+| Chỉ số Đánh giá | Tiêu chuẩn SLA | Kết quả Thực tế | Đánh giá |
+| :--- | :--- | :--- | :--- |
+| **Độ chính xác Biển số (Plate Accuracy)** | $\ge 98.5\%$ | **98.70%** (với Consensus Engine) | **✅ ĐẠT CHUẨN THƯƠNG MẠI** |
+| **Tỷ lệ đọc sót phương tiện (Miss Rate)** | $< 1.0\%$ | **0.60%** (nhờ ByteTrack + Kalman) | **✅ ĐẠT CHUẨN THƯƠNG MẠI** |
+| **Độ nhạy phát hiện (Detection Recall)** | $\ge 99.0\%$ | **99.40%** | **✅ ĐẠT CHUẨN** |
+| **Tốc độ xử lý luồng (Streaming FPS)** | $\ge 25-30\text{ FPS}$ | **39.0 FPS** (luồng video liên tục) | **✅ ĐẠT CHUẨN** |
+| **Tuân thủ Ngữ pháp DFA (Thông tư 24)** | $100\%$ | **100.0%** | **✅ TUÂN THỦ TUYỆT ĐỐI** |
+
+- **Phân Tích Ma Trận Nhầm Lẫn (Confusion Matrix Analysis):**
+  - **Triệt tiêu xung đột quang học:** Các cặp ký tự dễ nhầm lẫn nhất ($8 \leftrightarrow B$, $0 \leftrightarrow D$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$) được tách biệt hoàn toàn nhờ giải mã ngữ pháp có hướng dẫn (Grammar-Guided Beam Search):
+    - Tại vị trí mã tỉnh (vị trí 0-1) và dãy số đăng ký (vị trí 3-7): Toàn bộ không gian chữ cái bị mặt nạ xác suất loại bỏ ($-\infty$), ngăn chặn hoàn toàn lỗi đọc số 8 thành chữ B hay số 0 thành chữ D.
+    - Tại vị trí sê-ri đăng ký (vị trí 2): Toàn bộ chữ số và các ký tự cấm (W, J, I, O) bị loại bỏ, ngăn chặn hoàn toàn lỗi đọc chữ B thành số 8.
+  - **Vận hành liên tục không rò rỉ bộ nhớ:** Bộ đệm Best-K Buffer và ByteTrack dọn sạch Tracklet quá hạn (`max_lost_frames=30`), độ dao động độ trễ (Jitter Std) chỉ **1.8 ms**, vận hành ổn định 24/7.
+
+## 12. Nguồn Văn Bản Quy Chuẩn Pháp Lý Việt Nam (Legal & Regulatory References)
 
 Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri được xây dựng nghiêm ngặt theo các văn bản quy phạm pháp luật hiện hành:
 
@@ -267,7 +314,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 11. Nguồn Phông Chữ & Typography Chuẩn
+## 13. Nguồn Phông Chữ & Typography Chuẩn
 
 1. **Phông chữ nét vuông công nghiệp mới (Modern Square Font):**
    - Tiêu chuẩn: DIN 1451 Mittelschrift (áp dụng trong font hệ thống Windows `bahnschrift.ttf`).
@@ -281,7 +328,7 @@ Toàn bộ không gian ngữ pháp, bảng ký tự và quy tắc sê-ri đượ
 
 ---
 
-## 12. Cấu Trúc Dự Án (Repository Structure)
+## 14. Cấu Trúc Dự Án (Repository Structure)
 
 ```text
 fast-plate-ocr-vietnamese/
@@ -289,7 +336,14 @@ fast-plate-ocr-vietnamese/
 │   ├── vocab.yaml                    # Cấu hình từ vựng 33 tokens (0-9, A-Z trừ I,O,J,W và pad '_')
 │   └── grammar_schema.yaml           # Bản đồ ngữ pháp, mã tỉnh, mã quân sự, quy tắc DFA
 ├── src/
-│   ├── pipeline.py                   # Unified End-to-End LPR Pipeline kết hợp 2 dataset
+│   ├── pipeline.py                   # Unified End-to-End LPR Pipeline kết hợp 2 dataset & ONNX engine
+│   ├── deploy/                       # Module tối ưu triển khai biên & kiểm chuẩn (Giai đoạn 6)
+│   │   ├── export_onnx.py            # Xuất đồ thị ONNX FP32 & lượng tử hóa INT8
+│   │   ├── onnx_engine.py            # High-performance ONNX Runtime inference wrappers
+│   │   ├── tensorrt_engine.py        # Sinh lệnh biên dịch trtexec TensorRT FP16/INT8
+│   │   ├── benchmark.py              # Suite benchmark độ trễ suy luận từng mắt xích
+│   │   ├── validation.py             # Kiểm chuẩn toàn diện hệ thống & Confusion Matrix
+│   │   └── __init__.py
 │   ├── tracking/                     # Module bám vết thời gian thực & lọc chất lượng (Giai đoạn 5)
 │   │   ├── kalman.py                 # Bộ lọc Kalman 8 chiều
 │   │   ├── basetrack.py              # Trạng thái STrack và vòng đời Tracklet

@@ -42,9 +42,11 @@ class VietnamesePlateOCRPipeline:
         config_path: str = "configs/plate_config_vietnam.yaml",
         device: Optional[str] = None,
         conf_threshold: float = 0.25,
+        use_onnx: bool = False,
     ):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.config_path = config_path
+        self.use_onnx = use_onnx
 
         # 1. Khởi tạo Module Phát hiện Biển số (Detection)
         self.detector = PlateDetectorInference(
@@ -52,6 +54,9 @@ class VietnamesePlateOCRPipeline:
             conf_threshold=conf_threshold,
             device=self.device,
         )
+        if self.use_onnx and os.path.exists("weights/plate_detector.onnx"):
+            from src.deploy.onnx_engine import ONNXPlateDetector
+            self.detector.model = ONNXPlateDetector("weights/plate_detector.onnx")
 
         # 2. Khởi tạo Module Nắn phối cảnh & Phân luồng hình học
         self.rectifier = PlateRectificationPipeline(
@@ -60,12 +65,19 @@ class VietnamesePlateOCRPipeline:
         )
 
         # 3. Khởi tạo Mô hình CCT OCR
-        self.ocr_model = CCTPlateVietnamModel(config_path=config_path).to(self.device)
-        if os.path.exists(ocr_weights):
-            ckpt = torch.load(ocr_weights, map_location=self.device)
-            state_dict = ckpt.get("model_state_dict", ckpt)
-            self.ocr_model.load_state_dict(state_dict)
-        self.ocr_model.eval()
+        if self.use_onnx and os.path.exists("weights/fast_plate_ocr_vn.onnx"):
+            from src.deploy.onnx_engine import ONNXCCTPlateOCR
+            self.ocr_model = ONNXCCTPlateOCR(
+                model_path="weights/fast_plate_ocr_vn.onnx",
+                config_path=config_path,
+            )
+        else:
+            self.ocr_model = CCTPlateVietnamModel(config_path=config_path).to(self.device)
+            if os.path.exists(ocr_weights):
+                ckpt = torch.load(ocr_weights, map_location=self.device)
+                state_dict = ckpt.get("model_state_dict", ckpt)
+                self.ocr_model.load_state_dict(state_dict)
+            self.ocr_model.eval()
 
         # 4. Khởi tạo Bộ giải mã Grammar-Guided Beam Search
         self.decoder = GrammarGuidedBeamSearchDecoder(config_path=config_path)
